@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#061a35">
+
+<title>WHOT Arena</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 50% 8%, rgba(40,120,210,.24), transparent 32%),
+        radial-gradient(circle at 0% 55%, rgba(20,80,150,.14), transparent 35%),
+        linear-gradient(180deg, #061b31 0%, #031326 48%, #020d1b 100%);
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+    background-size: 38px 38px;
+    mask-image: linear-gradient(to bottom, black, transparent 75%);
+}
+
+/* HEADER */
+
+.header {
+    position: relative;
+    z-index: 5;
+    width: 100%;
+    padding: 20px clamp(18px, 5vw, 60px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(73,150,220,.22);
+    background: rgba(3,19,38,.78);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(72,164,255,.8),
+        transparent
+    );
+}
+
+.header .brand,
+.header .logo-text {
+    color: #5aaeff;
+    font-weight: 900;
+    letter-spacing: 2.5px;
+}
+
+.header a {
+    text-decoration: none;
+}
+
+.header .login,
+.header .login-button {
+    border: 2px solid #55aaff;
+    color: #fff;
+    padding: 13px 28px;
+    border-radius: 40px;
+    background: rgba(12,42,70,.5);
+    box-shadow:
+        0 0 20px rgba(55,157,255,.10),
+        inset 0 0 15px rgba(55,157,255,.05);
+    transition: .25s ease;
+}
+
+.header .login:hover,
+.header .login-button:hover {
+    transform: translateY(-2px);
+    background: rgba(30,91,145,.55);
+    box-shadow: 0 0 25px rgba(55,157,255,.25);
+}
+
+/* MAIN */
+
+.hero,
+main {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 900px);
+    margin: 0 auto;
+    padding: 25px 16px 35px;
+    text-align: center;
+}
+
+/* LOGO */
+
+.logo {
+    position: relative;
+    width: min(260px, 68vw);
+    height: 245px;
+    margin: 0 auto 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logo-glow {
+    position: absolute;
+    width: 260px;
+    height: 220px;
+    border-radius: 50%;
+    background: rgba(40,137,230,.20);
+    filter: blur(45px);
+}
+
+.cards {
+    position: absolute;
+    top: 38px;
+    width: 195px;
+    height: 120px;
+}
+
+.card {
+    position: absolute;
+    width: 73px;
+    height: 105px;
+    top: 0;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #fff, #dce7f0);
+    color: #123456;
+    box-shadow: 0 15px 30px rgba(0,0,0,.30);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 27px;
+}
+
+.card.left {
+    left: 6px;
+    transform: rotate(-13deg);
+    color: #d9314d;
+}
+
+.card.middle {
+    left: 61px;
+    top: -8px;
+    z-index: 3;
+    transform: rotate(0);
+    font-size: 40px;
+}
+
+.card.right {
+    right: 6px;
+    transform: rotate(13deg);
+    color: #2864a7;
+}
+
+.crown {
+    position: absolute;
+    z-index: 5;
+    top: 10px;
+    color: #ffd54f;
+    font-size: 38px;
+    line-height: 1;
+    text-shadow: 0 4px 12px rgba(255,194,40,.45);
+}
+
+.shield {
+    position: absolute;
+    z-index: 6;
+    top: 113px;
+    width: 195px;
+    min-height: 92px;
+    padding: 18px 20px 16px;
+    border-radius: 0 0 45% 45% / 0 0 28% 28%;
+    background: linear-gradient(145deg, #ffd95c, #d99a18);
+    border: 2px solid #ffe37a;
+    box-shadow:
+        0 15px 35px rgba(0,0,0,.40),
+        inset 0 2px 0 rgba(255,255,255,.35);
+    color: #07182b;
+}
+
+.shield strong {
+    display: block;
+    font-size: 34px;
+    letter-spacing: 2px;
+}
+
+.shield span {
+    display: block;
+    margin-top: -2px;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 5px;
+}
+
+.ribbon {
+    position: absolute;
+    z-index: 7;
+    top: 177px;
+    width: 225px;
+    padding: 10px 8px;
+    border: 2px solid #f0c642;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #0a3154, #08213a);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.30);
+}
+
+/* WELCOME TEXT */
+
+.welcome-label {
+    margin-top: 8px;
+    color: #62b3ff;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 5px;
+}
+
+h1 {
+    margin: 12px 0 16px;
+    font-size: clamp(42px, 9vw, 72px);
+    line-height: 1;
+    letter-spacing: -2px;
+    font-weight: 950;
+    text-shadow: 0 8px 25px rgba(0,0,0,.35);
+}
+
+h1 span {
+    color: #52a9ff;
+}
+
+.description {
+    max-width: 650px;
+    margin: 0 auto;
+    color: #a7bbce;
+    font-size: clamp(16px, 3.8vw, 20px);
+    line-height: 1.65;
+}
+
+/* MOTTO */
+
+.motto {
+    margin: 30px auto 0;
+    font-size: clamp(16px, 4vw, 21px);
+    font-weight: 900;
+    letter-spacing: 6px;
+    color: #fff;
+}
+
+.motto span {
+    color: #4da8ff;
+    padding: 0 5px;
+}
+
+/* INSIDE THE ARENA */
+
+.arena-highlights {
+    margin: 25px auto 16px;
+    width: 100%;
+}
+
+.highlights-title,
+.benefits-title {
+    color: #63b3ff;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 5px;
+    margin-bottom: 14px;
+}
+
+.highlight-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.highlight-card {
+    min-width: 0;
+    min-height: 160px;
+    padding: 17px 10px;
+    border: 1px solid rgba(61,126,181,.48);
+    border-radius: 20px;
+    background:
+        linear-gradient(145deg, rgba(15,52,84,.92), rgba(5,26,47,.92));
+    box-shadow:
+        0 12px 30px rgba(0,0,0,.20),
+        inset 0 1px 0 rgba(255,255,255,.05);
+    transition: .25s ease;
+}
+
+.highlight-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(75,166,244,.75);
+}
+
+.highlight-icon {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0b3155;
+    border: 1px solid #286b9e;
+    font-size: 25px;
+    box-shadow: 0 5px 18px rgba(0,0,0,.25);
+}
+
+.highlight-card strong {
+    display: block;
+    font-size: 13px;
+    letter-spacing: .5px;
+    margin-bottom: 7px;
+}
+
+.highlight-card span {
+    display: block;
+    color: #839db5;
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+/* BENEFITS */
+
+.arena-benefits {
+    width: 100%;
+    margin: 20px auto 20px;
+}
+
+.benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.benefit-item {
+    padding: 17px 8px;
+    border: 1px solid rgba(61,126,181,.45);
+    border-radius: 17px;
+    background: rgba(7,31,54,.72);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+.benefit-value {
+    color: #f4c94d;
+    font-size: 21px;
+    font-weight: 900;
+    margin-bottom: 6px;
+}
+
+.benefit-label {
+    color: #edf5fc;
+    font-size: 10px;
+    font-weight: 900;
+    line-height: 1.25;
+}
+
+.benefit-note {
+    margin-top: 5px;
+    color: #7891a9;
+    font-size: 9px;
+    line-height: 1.3;
+}
+
+/* BUTTONS */
+
+.buttons {
+    width: min(100%, 610px);
+    margin: 18px auto 0;
+    display: grid;
+    gap: 14px;
+}
+
+.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 62px;
+    padding: 16px 20px;
+    border-radius: 40px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: .4px;
+    transition: .25s ease;
+}
+
+.button.create {
+    color: #fff;
+    background: linear-gradient(135deg, #2e9bf0, #116ac0);
+    border: 1px solid #61baff;
+    box-shadow:
+        0 12px 28px rgba(20,115,200,.25),
+        inset 0 1px 0 rgba(255,255,255,.25);
+}
+
+.button.create:hover {
+    transform: translateY(-3px);
+    box-shadow:
+        0 16px 32px rgba(20,115,200,.35),
+        0 0 22px rgba(50,160,255,.15);
+}
+
+.button.login {
+    color: #fff;
+    background: rgba(6,28,50,.75);
+    border: 1.5px solid #4ca6fa;
+}
+
+.button.login:hover {
+    transform: translateY(-3px);
+    background: rgba(17,59,91,.75);
+}
+
+/* FOOTER */
+
+.footer-note {
+    margin-top: 20px;
+    color: #536b82;
+    font-size: 13px;
+    letter-spacing: .5px;
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    .header {
+        padding: 18px 16px;
+    }
+
+    .header .brand,
+    .header .logo-text {
+        font-size: 18px;
+        letter-spacing: 2px;
+    }
+
+    .header .login,
+    .header .login-button {
+        padding: 11px 21px;
+        font-size: 13px;
+    }
+
+    .hero,
+    main {
+        padding: 30px 14px 42px;
+    }
+
+    .logo {
+        transform: scale(.90);
+        transform-origin: top center;
+        margin-bottom: -25px;
+    }
+
+    .welcome-label {
+        margin-top: 0;
+    }
+
+    h1 {
+        font-size: 43px;
+    }
+
+    .description {
+        padding: 0 8px;
+    }
+
+    .motto {
+        letter-spacing: 4px;
+        margin-top: 25px;
+    }
+
+    .highlight-grid,
+    .benefits-grid {
+        gap: 7px;
+    }
+
+    .highlight-card {
+        min-height: 145px;
+        padding: 13px 6px;
+        border-radius: 17px;
+    }
+
+    .highlight-icon {
+        width: 46px;
+        height: 46px;
+        font-size: 22px;
+        margin-bottom: 8px;
+    }
+
+    .highlight-card strong {
+        font-size: 11px;
+    }
+
+    .highlight-card span {
+        font-size: 9.5px;
+    }
+
+    .benefit-item {
+        padding: 13px 5px;
+    }
+
+    .benefit-value {
+        font-size: 18px;
+    }
+
+    .benefit-label {
+        font-size: 8.5px;
+    }
+
+    .benefit-note {
+        font-size: 8px;
+    }
+
+    .button {
+        min-height: 58px;
+    }
+}
+
+@media (max-width: 370px) {
+
+    .hero,
+    main {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    h1 {
+        font-size: 38px;
+    }
+
+    .motto {
+        font-size: 14px;
+        letter-spacing: 3px;
+    }
+
+    .highlight-card {
+        min-height: 138px;
+    }
+
+    .highlight-card span {
+        font-size: 8.5px;
+    }
+}
+</style>
+
+<style>
+/* Compact Arena highlights to give the account buttons more room */
+.arena-highlights {
+    margin-top: 22px !important;
+    margin-bottom: 10px !important;
+}
+
+.arena-highlights .highlights-title {
+    margin-bottom: 12px !important;
+}
+
+.arena-highlights .highlight-grid {
+    gap: 10px !important;
+}
+
+.arena-highlights .highlight-card {
+    padding: 14px 8px !important;
+    min-height: 150px !important;
+}
+
+.arena-highlights .highlight-icon {
+    width: 52px !important;
+    height: 52px !important;
+    margin-bottom: 8px !important;
+}
+
+.arena-highlights .highlight-card strong {
+    margin-bottom: 5px !important;
+}
+
+.arena-highlights .highlight-card span {
+    line-height: 1.3 !important;
+}
+
+.buttons {
+    margin-top: 12px !important;
+}
+</style>
+
+
+<style>
+.arena-benefits {
+    width: 100%;
+    margin: 22px auto 18px;
+}
+
+.benefits-title {
+    text-align: center;
+    color: #63b0ff;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    margin-bottom: 12px;
+}
+
+.benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 9px;
+    width: 100%;
+}
+
+.benefit-item {
+    min-width: 0;
+    padding: 14px 7px;
+    text-align: center;
+    border: 1px solid #204e77;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #0b2948, #061b31);
+}
+
+.benefit-value {
+    color: #f5c94b;
+    font-size: 20px;
+    font-weight: 900;
+    margin-bottom: 6px;
+}
+
+.benefit-label {
+    color: #eef6ff;
+    font-size: 10px;
+    font-weight: 900;
+    line-height: 1.25;
+}
+
+.benefit-note {
+    color: #7f99b1;
+    font-size: 9px;
+    line-height: 1.3;
+    margin-top: 5px;
+}
+
+@media (max-width: 390px) {
+    .benefits-grid {
+        gap: 6px;
+    }
+
+    .benefit-item {
+        padding: 12px 5px;
+    }
+
+    .benefit-value {
+        font-size: 18px;
+    }
+
+    .benefit-label {
+        font-size: 9px;
+    }
+}
+</style>
+
+
+<style>
+/* RED ACCENTS */
+.card.left {
+    color: #ef4056 !important;
+}
+
+.highlight-card:nth-child(2) .highlight-icon {
+    border-color: #c93649 !important;
+    background: rgba(150,25,45,.22) !important;
+}
+
+.benefit-item:first-child .benefit-value {
+    color: #ff5265 !important;
+}
+
+.button.login {
+    border-color: #e04455 !important;
+}
+
+.button.login:hover {
+    background: rgba(115,25,40,.45) !important;
+}
+
+.header::after {
+    background: linear-gradient(
+        90deg,
+        transparent,
+        #e04455,
+        #4da8ff,
+        transparent
+    ) !important;
+}
+
+.arena-highlights,
+.arena-benefits {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+</style>
+
+
+<style>
+@media (max-width: 600px) {
+    .logo {
+        width: 230px !important;
+        height: 215px !important;
+        transform: scale(.82) !important;
+        margin-top: -8px !important;
+        margin-bottom: -32px !important;
+    }
+
+    .hero,
+    main {
+        width: 100%;
+        max-width: 100%;
+        padding: 20px 12px 32px !important;
+    }
+
+    .arena-highlights {
+        margin-top: 18px !important;
+    }
+
+    .arena-benefits {
+        margin-top: 15px !important;
+    }
+
+    .buttons {
+        margin-top: 14px !important;
+    }
+}
+
+@media (max-width: 370px) {
+    .logo {
+        transform: scale(.74) !important;
+        margin-bottom: -48px !important;
+    }
+
+    .hero,
+    main {
+        padding-left: 9px !important;
+        padding-right: 9px !important;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="page">
+
+    <!-- =========================
+         WHOT ARENA HEADER
+         ========================= -->
+
+    <header class="header">
+
+        <div class="header-name">
+            WHOT ARENA
+        </div>
+
+        <a href="/login" class="header-login">
+            LOGIN
+        </a>
+
+    </header>
+
+
+    <!-- =========================
+         WELCOME
+         ========================= -->
+
+    <main class="hero">
+
+        <!-- Embedded WHOT Arena Logo -->
+        <div class="logo">
+
+            <div class="logo-glow"></div>
+
+            <div class="crown">♛</div>
+
+            <div class="cards">
+
+                <div class="card left">♥</div>
+
+                <div class="card middle">W</div>
+
+                <div class="card right">♠</div>
+
+            </div>
+
+            <div class="shield">
+                <strong>WHOT</strong>
+                <span>ARENA</span>
+            </div>
+
+            
+
+
+<div class="ribbon">
+                PLAY • COMPETE • WIN
+            </div>
+
+
+
+        </div>
+
+
+        <div class="welcome-label">
+            WELCOME TO
+        </div>
+
+
+        <h1>
+            WHOT <span>ARENA</span>
+        </h1>
+
+
+        <p class="description">
+            Welcome to WHOT Arena — a place to play,
+            compete and enjoy the game.
+        </p>
+
+
+        <div class="motto">
+            PLAY <span>•</span> COMPETE <span>•</span> WIN
+
+
+        </div>
+
+<section class="arena-highlights">
+  <div class="highlights-title">INSIDE THE ARENA</div>
+  <div class="highlight-grid">
+    <div class="highlight-card">
+      <div class="highlight-icon">⚡</div>
+      <strong>QUICK MATCHES</strong>
+      <span>Get into the game and start playing.</span>
+    </div>
+    <div class="highlight-card">
+      <div class="highlight-icon">🏆</div>
+      <strong>COMPETE</strong>
+      <span>Challenge players and climb the Arena.</span>
+    </div>
+    <div class="highlight-card">
+      <div class="highlight-icon">₦</div>
+      <strong>REWARDS</strong>
+      <span>Eligible games display their prize before you play.</span>
+    </div>
+  </div>
+</section>
+
+
+<section class="arena-benefits">
+    <div class="benefits-title">ARENA BENEFITS</div>
+
+    <div class="benefits-grid">
+        <div class="benefit-item">
+            <div class="benefit-value">₦25</div>
+            <div class="benefit-label">REFERRAL REWARD</div>
+            <div class="benefit-note">For each qualifying referral</div>
+        </div>
+
+        <div class="benefit-item">
+            <div class="benefit-value">₦100</div>
+            <div class="benefit-label">MINIMUM DEPOSIT</div>
+            <div class="benefit-note">Add funds from just ₦100</div>
+        </div>
+
+        <div class="benefit-item">
+            <div class="benefit-value">₦200</div>
+            <div class="benefit-label">MINIMUM WITHDRAWAL</div>
+            <div class="benefit-note">Cash out from ₦200</div>
+        </div>
+    </div>
+</section>
+
+
+
+
+        <!-- Account buttons -->
+
+        <div class="buttons">
+
+            <a href="/register" class="button create">
+                CREATE ACCOUNT
+            </a>
+
+            <a href="/login" class="button login">
+                LOGIN TO YOUR ACCOUNT
+            </a>
+
+        </div>
+
+
+
+        
+
+
+        <!-- ==============================
+             INSIDE THE ARENA
+             ============================== -->
+
+        
+
+        <div class="footer-note">
+            Welcome to the Arena
+        </div>
+
+    </main>
+
+</div>
+
+</body>
+</html>

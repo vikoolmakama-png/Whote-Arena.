@@ -1,0 +1,124 @@
+
+===== deposits =====
+id | INTEGER | notnull=0 | default=None | pk=1
+user_id | INTEGER | notnull=1 | default=None | pk=0
+amount | INTEGER | notnull=1 | default=None | pk=0
+status | TEXT | notnull=1 | default='pending' | pk=0
+created_at | TIMESTAMP | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+sender_name | TEXT | notnull=0 | default=None | pk=0
+rejection_reason | TEXT | notnull=0 | default=None | pk=0
+reviewed_at | TIMESTAMP | notnull=0 | default=None | pk=0
+
+===== game_history =====
+id | INTEGER | notnull=0 | default=None | pk=1
+user_id | INTEGER | notnull=1 | default=None | pk=0
+game_id | TEXT | notnull=1 | default=None | pk=0
+stake | INTEGER | notnull=1 | default=None | pk=0
+outcome | TEXT | notnull=1 | default='active' | pk=0
+winnings | INTEGER | notnull=1 | default=0 | pk=0
+created_at | TIMESTAMP | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+completed_at | TIMESTAMP | notnull=0 | default=None | pk=0
+
+===== game_queue =====
+id | INTEGER | notnull=0 | default=None | pk=1
+user_id | INTEGER | notnull=1 | default=None | pk=0
+stake | INTEGER | notnull=1 | default=None | pk=0
+status | TEXT | notnull=1 | default='waiting' | pk=0
+match_id | TEXT | notnull=0 | default=None | pk=0
+opponent_id | INTEGER | notnull=0 | default=None | pk=0
+created_at | DATETIME | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+
+===== player_challenges =====
+id | INTEGER | notnull=0 | default=None | pk=1
+challenger_id | INTEGER | notnull=1 | default=None | pk=0
+challenged_id | INTEGER | notnull=1 | default=None | pk=0
+stake | INTEGER | notnull=1 | default=None | pk=0
+status | TEXT | notnull=1 | default='pending' | pk=0
+created_at | TIMESTAMP | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+responded_at | TIMESTAMP | notnull=0 | default=None | pk=0
+
+===== player_presence =====
+user_id | INTEGER | notnull=0 | default=None | pk=1
+last_seen | TIMESTAMP | notnull=1 | default=CURRENT_TIMESTAMP | pk=0
+
+===== referrals =====
+id | INTEGER | notnull=0 | default=None | pk=1
+referrer_id | INTEGER | notnull=1 | default=None | pk=0
+referred_id | INTEGER | notnull=1 | default=None | pk=0
+referral_code | TEXT | notnull=1 | default=None | pk=0
+qualified | INTEGER | notnull=1 | default=0 | pk=0
+reward_paid | INTEGER | notnull=1 | default=0 | pk=0
+reward_amount | INTEGER | notnull=1 | default=25 | pk=0
+created_at | TIMESTAMP | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+qualified_at | TIMESTAMP | notnull=0 | default=None | pk=0
+reward_paid_at | TIMESTAMP | notnull=0 | default=None | pk=0
+
+===== tournament_matches =====
+id | INTEGER | notnull=0 | default=None | pk=1
+tournament_id | INTEGER | notnull=1 | default=None | pk=0
+round_number | INTEGER | notnull=1 | default=None | pk=0
+match_number | INTEGER | notnull=1 | default=None | pk=0
+player1_id | INTEGER | notnull=0 | default=None | pk=0
+player2_id | INTEGER | notnull=0 | default=None | pk=0
+winner_id | INTEGER | notnull=0 | default=None | pk=0
+status | TEXT | notnull=1 | default='pending' | pk=0
+created_at | TIMESTAMP | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+completed_at | TIMESTAMP | notnull=0 | default=None | pk=0
+turn_player_id | INTEGER | notnull=0 | default=None | pk=0
+turn_deadline | TIMESTAMP | notnull=0 | default=None | pk=0
+round_started_at | TIMESTAMP | notnull=0 | default=None | pk=0
+ready_deadline | TIMESTAMP | notnull=0 | default=None | pk=0
+p1_ready | INTEGER | notnull=1 | default=0 | pk=0
+p2_ready | INTEGER | notnull=1 | default=0 | pk=0
+match_started_at | TIMESTAMP | notnull=0 | default=None | pk=0
+
+===== tournament_players =====
+id | INTEGER | notnull=0 | default=None | pk=1
+tournament_id | INTEGER | notnull=1 | default=None | pk=0
+user_id | INTEGER | notnull=0 | default=None | pk=0
+username | TEXT | notnull=1 | default=None | pk=0
+is_ai | INTEGER | notnull=1 | default=0 | pk=0
+slot_number | INTEGER | notnull=1 | default=None | pk=0
+status | TEXT | notnull=1 | default='active' | pk=0
+joined_at | TIMESTAMP | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+
+===== tournaments =====
+id | INTEGER | notnull=0 | default=None | pk=1
+entry_fee | INTEGER | notnull=1 | default=200 | pk=0
+prize | INTEGER | notnull=1 | default=1700 | pk=0
+max_players | INTEGER | notnull=1 | default=10 | pk=0
+min_humans | INTEGER | notnull=1 | default=4 | pk=0
+status | TEXT | notnull=1 | default='open' | pk=0
+start_at | TIMESTAMP | notnull=1 | default=None | pk=0
+created_at | TIMESTAMP | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+started_at | TIMESTAMP | notnull=0 | default=None | pk=0
+completed_at | TIMESTAMP | notnull=0 | default=None | pk=0
+prize_first | INTEGER | notnull=1 | default=1500 | pk=0
+prize_second | INTEGER | notnull=1 | default=800 | pk=0
+prize_third | INTEGER | notnull=1 | default=500 | pk=0
+arena_fee | INTEGER | notnull=1 | default=400 | pk=0
+current_round | INTEGER | notnull=1 | default=0 | pk=0
+round_deadline | TIMESTAMP | notnull=0 | default=None | pk=0
+winner_paid | INTEGER | notnull=1 | default=0 | pk=0
+
+===== users =====
+id | INTEGER | notnull=0 | default=None | pk=1
+username | TEXT | notnull=1 | default=None | pk=0
+phone | TEXT | notnull=1 | default=None | pk=0
+password_hash | TEXT | notnull=1 | default=None | pk=0
+balance | INTEGER | notnull=1 | default=0 | pk=0
+created_at | TIMESTAMP | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+referral_code | TEXT | notnull=0 | default=None | pk=0
+referred_by | TEXT | notnull=0 | default=None | pk=0
+device_token | TEXT | notnull=0 | default=None | pk=0
+
+===== withdrawals =====
+id | INTEGER | notnull=0 | default=None | pk=1
+user_id | INTEGER | notnull=1 | default=None | pk=0
+amount | INTEGER | notnull=1 | default=None | pk=0
+status | TEXT | notnull=1 | default='pending' | pk=0
+created_at | TIMESTAMP | notnull=0 | default=CURRENT_TIMESTAMP | pk=0
+bank_name | TEXT | notnull=0 | default=None | pk=0
+account_name | TEXT | notnull=0 | default=None | pk=0
+account_number | TEXT | notnull=0 | default=None | pk=0
+rejection_reason | TEXT | notnull=0 | default=None | pk=0

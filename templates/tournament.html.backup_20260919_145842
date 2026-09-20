@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WHOT Arena — Tournament</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    background:
+      radial-gradient(circle at top,#182b65 0,#090f26 42%,#050914 100%);
+    color:#fff;
+    font-family:Arial,sans-serif;
+    min-height:100vh;
+}
+.page{
+    width:100%;
+    max-width:900px;
+    margin:auto;
+    padding:18px 14px 40px;
+}
+.top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:18px;
+}
+.back{
+    text-decoration:none;
+    color:#fff;
+    background:#172653;
+    border:1px solid #31549b;
+    padding:10px 14px;
+    border-radius:11px;
+    font-size:13px;
+    font-weight:800;
+}
+.brand{
+    font-weight:1000;
+    letter-spacing:1px;
+    color:#55e7ff;
+}
+.hero{
+    text-align:center;
+    padding:20px 10px 18px;
+}
+.cup{
+    font-size:45px;
+}
+h1{
+    margin:6px 0;
+    font-size:28px;
+}
+.sub{
+    color:#9eafd4;
+    font-size:13px;
+}
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:9px;
+    margin:12px 0;
+}
+.stat{
+    background:linear-gradient(145deg,#111e48,#171044);
+    border:1px solid #304f91;
+    border-radius:14px;
+    padding:13px 7px;
+    text-align:center;
+}
+.stat b{
+    display:block;
+    color:#fff;
+    font-size:17px;
+}
+.stat span{
+    color:#91a4cf;
+    font-size:10px;
+    text-transform:uppercase;
+}
+.join{
+    width:100%;
+    border:0;
+    border-radius:14px;
+    padding:15px;
+    margin:8px 0 20px;
+    background:linear-gradient(135deg,#00e676,#00bfa5);
+    color:#04101d;
+    font-size:15px;
+    font-weight:1000;
+}
+.section{
+    background:rgba(11,20,50,.88);
+    border:1px solid #263f7b;
+    border-radius:18px;
+    padding:16px;
+    margin-bottom:15px;
+}
+.section h2{
+    margin:0 0 14px;
+    font-size:17px;
+}
+.info{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+.info div{
+    background:#0a1433;
+    border-radius:11px;
+    padding:11px;
+}
+.info small{
+    color:#8295bf;
+    display:block;
+    font-size:10px;
+}
+.info strong{
+    display:block;
+    margin-top:4px;
+    font-size:14px;
+}
+.bracket{
+    overflow-x:auto;
+}
+.bracket-grid{
+    min-width:650px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+}
+.round h3{
+    text-align:center;
+    color:#59dfff;
+    font-size:11px;
+    margin:0 0 10px;
+}
+.match{
+    background:#101c40;
+    border:1px solid #2e4d91;
+    border-radius:10px;
+    padding:8px;
+    margin-bottom:12px;
+}
+.player{
+    display:flex;
+    justify-content:space-between;
+    padding:7px 5px;
+    background:#172653;
+    border-radius:6px;
+    margin:3px 0;
+    font-size:11px;
+}
+.bye{
+    color:#ffd54a;
+    font-size:9px;
+}
+.rules{
+    color:#a9b8d8;
+    font-size:12px;
+    line-height:1.7;
+}
+.warning{
+    margin-top:10px;
+    color:#ffcf58;
+    font-size:11px;
+    line-height:1.5;
+}
+@media(max-width:500px){
+    .stats{grid-template-columns:repeat(3,1fr)}
+    .stat b{font-size:14px}
+    .info{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+
+    <div class="top">
+        <a href="/dashboard" class="back">← BACK</a>
+        <div class="brand">WHOT ARENA</div>
+    </div>
+
+    <div class="hero">
+        <div class="cup">🏆</div>
+        <h1>WHOT ARENA TOURNAMENT</h1>
+        <div class="sub">10 Players • Champions League Knockout Knockout</div>
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <b>₦200</b>
+            <span>Entry Fee</span>
+        </div>
+        <div class="stat">
+            <b>0 / 10</b>
+            <span>Players</span>
+        </div>
+        <div class="stat">
+            <b>₦1,500</b>
+            <span>1st Prize</span>
+        </div>
+    </div>
+
+    <button class="join" onclick="joinTournament()">
+        JOIN TOURNAMENT — ₦200
+    </button>
+
+    <div class="section">
+        <h2>🏆 Tournament Details</h2>
+        <div class="info">
+            <div>
+                <small>Format</small>
+                <strong>Champions League Knockout</strong>
+            </div>
+            <div>
+                <small>Maximum Players</small>
+                <strong>10 Players</strong>
+            </div>
+            <div>
+                <small>Total Entries</small>
+                <strong>₦2,000</strong>
+            </div>
+            <div>
+                <small>Champion Prize</small>
+                <strong>₦1,500</strong>
+            </div>
+            <div>
+                <small>Tournament Fee</small>
+                <strong>₦300</strong>
+            </div>
+            <div>
+                <small>Registration</small>
+                <strong>OPEN</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>⚔️ Knockout Table</h2>
+
+        <div class="bracket">
+            <div class="bracket-grid">
+
+                <div class="round">
+                    <h3>ROUND 1</h3>
+
+                    <div class="match">
+                        <div class="player">Player 7 <span>—</span></div>
+                        <div class="player">Player 10 <span>—</span></div>
+                    </div>
+
+                    <div class="match">
+                        <div class="player">Player 8 <span>—</span></div>
+                        <div class="player">Player 9 <span>—</span></div>
+                    </div>
+
+                    <div class="match">
+                        <div class="player">Seed 1 <span class="bye">BYE</span></div>
+                    </div>
+
+                    <div class="match">
+                        <div class="player">Seed 2 <span class="bye">BYE</span></div>
+                    </div>
+
+                    <div class="match">
+                        <div class="player">Seed 3 <span class="bye">BYE</span></div>
+                    </div>
+
+                    <div class="match">
+                        <div class="player">Seed 4 <span class="bye">BYE</span></div>
+                    </div>
+
+                    <div class="match">
+                        <div class="player">Seed 5 <span class="bye">BYE</span></div>
+                    </div>
+
+                    <div class="match">
+                        <div class="player">Seed 6 <span class="bye">BYE</span></div>
+                    </div>
+                </div>
+
+                <div class="round">
+                    <h3>QUARTERFINALS</h3>
+                    <div class="match">
+                        <div class="player">Winner R1</div>
+                        <div class="player">Seed 1</div>
+                    </div>
+                    <div class="match">
+                        <div class="player">Winner R1</div>
+                        <div class="player">Seed 2</div>
+                    </div>
+                    <div class="match">
+                        <div class="player">Seed 3</div>
+                        <div class="player">Seed 4</div>
+                    </div>
+                    <div class="match">
+                        <div class="player">Seed 5</div>
+                        <div class="player">Seed 6</div>
+                    </div>
+                </div>
+
+                <div class="round">
+                    <h3>SEMIFINALS</h3>
+                    <div class="match" style="margin-top:45px">
+                        <div class="player">QF Winner</div>
+                        <div class="player">QF Winner</div>
+                    </div>
+                    <div class="match" style="margin-top:70px">
+                        <div class="player">QF Winner</div>
+                        <div class="player">QF Winner</div>
+                    </div>
+                </div>
+
+                <div class="round">
+                    <h3>FINAL</h3>
+                    <div class="match" style="margin-top:115px">
+                        <div class="player">SEMIFINAL WINNER</div>
+                        <div class="player">SEMIFINAL WINNER</div>
+                    </div>
+                    <div style="text-align:center;font-size:25px;margin-top:15px">🏆</div>
+                    <div style="text-align:center;color:#ffd54a;font-weight:900;font-size:12px">
+                        ₦1,500 CHAMPION
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📋 Tournament Rules</h2>
+        <div class="rules">
+            • Entry fee: ₦200<br>
+            • Maximum: 10 players<br>
+            • Each match is 1 vs 1<br>
+            • Winner advances automatically<br>
+            • Final winner receives ₦1,500<br>
+            • Tournament results are recorded in the Arena
+        </div>
+        <div class="warning">
+            Real-money tournament entry should only be enabled after the required
+            gaming authorization and payment controls are in place.
+        </div>
+    </div>
+
+</div>
+
+<script>
+async function joinTournament(){
+    const button = document.querySelector(".join");
+
+    if(button){
+        button.disabled = true;
+        button.textContent = "JOINING...";
+    }
+
+    try{
+        const response = await fetch("/tournament/join", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        const result = await response.json();
+
+        if(result.success){
+            alert(
+                "Tournament joined successfully!\\n\\n" +
+                "Entry Fee: ₦" + Number(result.entry_fee).toLocaleString() + "\\n" +
+                "Your Slot: " + result.slot_number
+            );
+
+            window.location.reload();
+            return;
+        }
+
+        alert(result.message || "Unable to join tournament.");
+
+    }catch(error){
+        alert("Unable to connect to the tournament server. Please try again.");
+    }
+
+    if(button){
+        button.disabled = false;
+        button.textContent = "JOIN TOURNAMENT — ₦200";
+    }
+}
+</script>
+
+
+<section style="
+margin:18px 0;
+padding:20px;
+border-radius:20px;
+background:linear-gradient(145deg,#101b38,#17102d);
+border:1px solid rgba(255,215,80,.25);
+box-shadow:0 10px 30px rgba(0,0,0,.25);
+">
+<h2 style="margin:0 0 14px;">🏆 16-PLAYER WHOT ARENA</h2>
+<div style="display:grid;gap:10px;">
+<div>🎟️ Entry: <strong>₦200</strong></div>
+<div>👥 Players: <strong>16</strong></div>
+<div>🥇 1st Place: <strong>₦1,500</strong></div>
+<div>🥈 2nd Place: <strong>₦800</strong></div>
+<div>🥉 3rd Place: <strong>₦500</strong></div>
+<div>🏦 Arena Fee: <strong>₦400</strong></div>
+</div>
+<p style="margin:14px 0 0;opacity:.8;">
+16 × ₦200 = ₦3,200 total tournament pool.
+</p>
+</section>
+
+<section style="
+margin:18px 0;
+padding:20px;
+border-radius:20px;
+background:#0d1630;
+border:1px solid rgba(0,200,255,.2);
+">
+<h2 style="margin:0 0 14px;">⚔️ KNOCKOUT FORMAT</h2>
+<div style="display:grid;gap:8px;">
+<div>ROUND OF 16 → 8 winners</div>
+<div>QUARTER-FINALS → 4 winners</div>
+<div>SEMI-FINALS → 2 winners</div>
+<div>FINAL → Champion</div>
+</div>
+<p style="margin:14px 0 0;">
+⏱️ Each player's move has a <strong>20-second limit</strong>.
+</p>
+</section>
+
+</body>
+</html>

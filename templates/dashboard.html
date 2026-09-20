@@ -1,0 +1,2047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>WHOT Arena — Dashboard</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    min-height:100vh;
+    color:#e4e7ff;
+    background:
+      radial-gradient(circle at 15% 5%,rgba(125,45,255,.20),transparent 28%),
+      radial-gradient(circle at 90% 30%,rgba(0,210,255,.12),transparent 25%),
+      linear-gradient(180deg,#03091d,#061433 55%,#03091d);
+    overflow-x:hidden;
+}
+
+a{
+    text-decoration:none;
+    color:inherit;
+}
+
+.app{
+    width:min(1120px,calc(100% - 24px));
+    margin:auto;
+}
+
+/* HEADER */
+.header{
+    height:68px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:1px solid rgba(86,92,190,.28);
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    font-weight:1000;
+    letter-spacing:1px;
+}
+
+.logo{
+    width:38px;
+    height:42px;
+    display:grid;
+    place-items:center;
+    background:linear-gradient(145deg,#ffd33f,#ef9616);
+    clip-path:polygon(50% 0,100% 17%,88% 78%,50% 100%,12% 78%,0 17%);
+}
+
+.logo span{
+    width:29px;
+    height:31px;
+    display:grid;
+    place-items:center;
+    background:#07183c;
+    clip-path:polygon(50% 0,100% 17%,88% 78%,50% 100%,12% 78%,0 17%);
+    color:#ffd13c;
+    font-size:17px;
+}
+
+.brand span{
+    color:#ffc934;
+}
+
+.header-right{
+    display:flex;
+    align-items:center;
+    gap:9px;
+}
+
+.logout{
+    padding:9px 14px;
+    border:1px solid rgba(255,54,92,.5);
+    border-radius:20px;
+    color:#ff6480;
+    font-size:11px;
+    font-weight:900;
+}
+
+.logout:hover{
+    background:rgba(255,30,70,.12);
+}
+
+/* WELCOME */
+.welcome{
+    padding:25px 0 17px;
+}
+
+.welcome small{
+    color:#3bd5ff;
+    font-size:10px;
+    font-weight:900;
+    letter-spacing:2px;
+}
+
+.welcome h1{
+    margin-top:5px;
+    font-size:29px;
+    color:#f0f1ff;
+}
+
+.welcome h1 span{
+    color:#ffc936;
+}
+
+.welcome p{
+    margin-top:5px;
+    color:#7f91b8;
+    font-size:12px;
+}
+
+/* BALANCE */
+.balance{
+    padding:23px;
+    border-radius:20px;
+    position:relative;
+    overflow:hidden;
+    background:
+      radial-gradient(circle at 85% 15%,rgba(255,202,52,.18),transparent 27%),
+      radial-gradient(circle at 5% 90%,rgba(139,43,255,.18),transparent 32%),
+      linear-gradient(125deg,#101c4b,#081432);
+    border:1px solid rgba(78,173,255,.32);
+    box-shadow:0 18px 45px rgba(0,0,0,.22);
+}
+
+.balance:after{
+    content:"";
+    position:absolute;
+    width:170px;
+    height:170px;
+    right:-70px;
+    bottom:-90px;
+    border-radius:50%;
+    border:35px solid rgba(0,207,255,.07);
+}
+
+.balance-label{
+    color:#8da5ca;
+    font-size:10px;
+    letter-spacing:1px;
+}
+
+.balance-amount{
+    margin:6px 0 15px;
+    font-size:38px;
+    font-weight:1000;
+    color:#fff;
+}
+
+.balance-actions{
+    display:flex;
+    gap:8px;
+}
+
+.action{
+    padding:10px 17px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:900;
+}
+
+.add{
+    background:linear-gradient(135deg,#09b9ff,#3159ff);
+}
+
+.cash{
+    border:1px solid #a144ff;
+    color:#ca8aff;
+    background:rgba(126,48,255,.09);
+}
+
+/* MAIN GRID */
+.grid{
+    display:grid;
+    grid-template-columns:1.35fr .65fr;
+    gap:14px;
+    margin-top:14px;
+}
+
+/* SECTION CARD */
+.panel{
+    border-radius:18px;
+    padding:19px;
+    background:rgba(7,20,49,.84);
+    border:1px solid rgba(79,94,185,.30);
+}
+
+.panel-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
+}
+
+.panel-title h2{
+    font-size:17px;
+}
+
+.panel-title span{
+    color:#687da7;
+    font-size:9px;
+}
+
+/* PLAY CARDS */
+.play-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+}
+
+.play-card{
+    min-height:120px;
+    padding:16px;
+    border-radius:15px;
+    position:relative;
+    overflow:hidden;
+    border:1px solid rgba(58,167,255,.28);
+    background:linear-gradient(145deg,#0c2856,#081632);
+}
+
+.play-card:after{
+    content:"";
+    position:absolute;
+    width:85px;
+    height:85px;
+    right:-30px;
+    bottom:-30px;
+    border-radius:50%;
+    background:rgba(40,205,255,.10);
+}
+
+.play-card.red{
+    background:linear-gradient(145deg,#3a102d,#160c2c);
+    border-color:rgba(255,46,96,.38);
+}
+
+.play-card.purple{
+    background:linear-gradient(145deg,#24104c,#0e1236);
+    border-color:rgba(158,68,255,.38);
+}
+
+.play-card.gold{
+    background:linear-gradient(145deg,#392710,#15152c);
+    border-color:rgba(255,199,51,.36);
+}
+
+.play-icon{
+    font-size:25px;
+    margin-bottom:10px;
+}
+
+.play-card h3{
+    font-size:14px;
+    margin-bottom:4px;
+}
+
+.play-card p{
+    color:#8194ba;
+    font-size:9px;
+    line-height:1.4;
+}
+
+.play-link{
+    position:absolute;
+    right:13px;
+    top:13px;
+    color:#3fd5ff;
+    font-size:10px;
+    font-weight:900;
+}
+
+/* QUICK STATS */
+.stats{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
+
+.stat{
+    padding:15px 12px;
+    border-radius:14px;
+    background:rgba(14,29,65,.75);
+    border:1px solid rgba(81,103,190,.25);
+}
+
+.stat-icon{
+    font-size:19px;
+}
+
+.stat strong{
+    display:block;
+    margin-top:8px;
+    font-size:17px;
+}
+
+.stat small{
+    color:#7286ae;
+    font-size:9px;
+}
+
+/* BONUS */
+.bonus{
+    margin-top:14px;
+    padding:17px;
+    border-radius:16px;
+    background:linear-gradient(110deg,rgba(255,40,100,.12),rgba(139,47,255,.13));
+    border:1px solid rgba(255,76,133,.28);
+}
+
+.bonus-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.bonus h3{
+    font-size:14px;
+}
+
+.bonus-value{
+    color:#ffc936;
+    font-size:21px;
+    font-weight:1000;
+}
+
+.bonus p{
+    margin-top:6px;
+    color:#8192b5;
+    font-size:9px;
+    line-height:1.45;
+}
+
+/* PROFILE */
+.profile{
+    margin-top:14px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.profile-item{
+    padding:14px;
+    border-radius:14px;
+    background:rgba(8,21,51,.78);
+    border:1px solid rgba(72,92,170,.24);
+}
+
+.profile-item label{
+    display:block;
+    color:#687ea8;
+    font-size:9px;
+    margin-bottom:5px;
+}
+
+.profile-item strong{
+    font-size:12px;
+    word-break:break-word;
+}
+
+/* REFERRAL */
+.referral{
+    margin-top:14px;
+    padding:18px;
+    border-radius:17px;
+    background:linear-gradient(110deg,#101044,#101a42);
+    border:1px solid rgba(159,76,255,.32);
+}
+
+.referral h3{
+    color:#c798ff;
+    font-size:15px;
+}
+
+.referral p{
+    color:#7c8eb5;
+    font-size:9px;
+    line-height:1.45;
+    margin:6px 0 12px;
+}
+
+.referral-button{
+    display:block;
+    text-align:center;
+    padding:10px;
+    border-radius:20px;
+    background:linear-gradient(135deg,#763cff,#c52eff);
+    font-size:10px;
+    font-weight:900;
+}
+
+/* FOOTER */
+.footer{
+    text-align:center;
+    padding:30px 0;
+    color:#536789;
+    font-size:9px;
+}
+
+
+/* WORKING REFERRAL SYSTEM */
+.referral-stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:7px;
+    margin:12px 0;
+}
+
+.ref-stat{
+    padding:10px 5px;
+    border-radius:12px;
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.08);
+    text-align:center;
+}
+
+.ref-stat strong{
+    display:block;
+    color:#fff;
+    font-size:14px;
+    font-weight:900;
+}
+
+.ref-stat span{
+    display:block;
+    margin-top:4px;
+    color:#7184a7;
+    font-size:8px;
+}
+
+.referral-link-box{
+    margin-top:10px;
+}
+
+.referral-link-box label{
+    display:block;
+    color:#8498bd;
+    font-size:8px;
+    font-weight:900;
+    margin-bottom:5px;
+}
+
+.referral-link-box input{
+    width:100%;
+    min-width:0;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid rgba(159,76,255,.3);
+    background:#080d25;
+    color:#bca8ff;
+    font-size:9px;
+    outline:none;
+}
+
+.referral-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+    margin-top:8px;
+}
+
+.referral-actions button{
+    border:0;
+    cursor:pointer;
+    color:#fff;
+    font-family:inherit;
+}
+
+.referral-button.share-ref{
+    background:linear-gradient(135deg,#e52e62,#ff5c38);
+}
+
+.referral-code{
+    margin-top:10px;
+    text-align:center;
+    color:#7789aa;
+    font-size:9px;
+}
+
+.referral-code strong{
+    color:#d2a7ff;
+    letter-spacing:1px;
+}
+
+.referral-rules{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    margin-top:12px;
+    padding-top:10px;
+    border-top:1px solid rgba(255,255,255,.07);
+    color:#7386aa;
+    font-size:8px;
+    line-height:1.45;
+}
+
+.referral-rules strong{
+    color:#c798ff;
+    font-size:9px;
+    margin-bottom:2px;
+}
+
+@media(max-width:420px){
+    .referral-stats{
+        gap:5px;
+    }
+
+    .ref-stat{
+        padding:9px 3px;
+    }
+
+    .ref-stat strong{
+        font-size:12px;
+    }
+
+    .referral-actions{
+        grid-template-columns:1fr;
+    }
+}
+
+/* MOBILE */
+@media(max-width:760px){
+
+    .app{
+        width:calc(100% - 18px);
+    }
+
+    .header{
+        height:60px;
+    }
+
+    .logo{
+        width:33px;
+        height:36px;
+    }
+
+    .logo span{
+        width:25px;
+        height:27px;
+        font-size:15px;
+    }
+
+    .brand{
+        font-size:13px;
+    }
+
+    .welcome{
+        padding:20px 0 13px;
+    }
+
+    .welcome h1{
+        font-size:24px;
+    }
+
+    .balance{
+        padding:19px;
+        border-radius:17px;
+    }
+
+    .balance-amount{
+        font-size:32px;
+    }
+
+    .grid{
+        grid-template-columns:1fr;
+    }
+
+    .play-card{
+        min-height:115px;
+    }
+
+    .panel{
+        padding:16px;
+    }
+}
+
+@media(max-width:390px){
+
+    .play-grid{
+        gap:6px;
+    }
+
+    .play-card{
+        padding:13px;
+    }
+
+    .play-card h3{
+        font-size:12px;
+    }
+
+    .play-card p{
+        font-size:8px;
+    }
+
+    .balance-actions .action{
+        padding:9px 13px;
+    }
+}
+
+/* ===== STAKE SELECTOR ===== */
+
+.stake-modal{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:15px;
+    background:rgba(1,5,18,.82);
+    backdrop-filter:blur(10px);
+}
+
+.stake-modal.show{
+    display:flex;
+}
+
+.stake-box{
+    width:min(450px,100%);
+    max-height:90vh;
+    overflow:auto;
+    padding:24px;
+    border-radius:22px;
+    background:
+      radial-gradient(circle at 90% 0%,rgba(151,50,255,.18),transparent 30%),
+      linear-gradient(145deg,#101a45,#050d27);
+    border:1px solid rgba(80,190,255,.35);
+    box-shadow:0 25px 70px rgba(0,0,0,.55);
+    position:relative;
+}
+
+.stake-close{
+    position:absolute;
+    top:12px;
+    right:14px;
+    width:32px;
+    height:32px;
+    border:0;
+    border-radius:50%;
+    background:rgba(255,255,255,.06);
+    color:#aab8d8;
+    font-size:23px;
+    cursor:pointer;
+}
+
+.stake-kicker{
+    color:#38d8ff;
+    font-size:9px;
+    letter-spacing:3px;
+    font-weight:900;
+    margin-bottom:7px;
+}
+
+.stake-box h2{
+    color:#eef0ff;
+    font-size:24px;
+}
+
+.stake-box > p{
+    color:#788caf;
+    font-size:11px;
+    margin-top:5px;
+    margin-bottom:17px;
+}
+
+.stakes{
+    display:grid;
+    gap:8px;
+}
+
+.stake{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:13px 15px;
+    border-radius:13px;
+    background:linear-gradient(100deg,#0d2451,#10143d);
+    border:1px solid rgba(75,145,220,.24);
+    transition:.18s;
+}
+
+.stake:hover{
+    transform:translateY(-2px);
+    border-color:#36d5ff;
+    background:linear-gradient(100deg,#123269,#17154b);
+}
+
+.stake strong{
+    display:block;
+    color:#f1f2ff;
+    font-size:17px;
+}
+
+.stake small{
+    display:block;
+    color:#687fa8;
+    font-size:8px;
+    margin-top:3px;
+}
+
+.stake > span{
+    color:#ffc936;
+    font-size:18px;
+    font-weight:1000;
+}
+
+.stake-note{
+    margin-top:13px;
+    padding:10px;
+    border-radius:10px;
+    background:rgba(0,190,255,.06);
+    color:#7087ad;
+    font-size:9px;
+    text-align:center;
+}
+
+@media(max-width:500px){
+    .stake-box{
+        padding:20px 15px;
+        border-radius:19px;
+    }
+
+    .stake-box h2{
+        font-size:21px;
+    }
+
+    .stake{
+        padding:11px 13px;
+    }
+}
+
+    .whatsapp-group {
+        width: 100%;
+        margin-top: 14px;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        color: #fff;
+        border: 1px solid rgba(37, 211, 102, .65);
+        border-radius: 16px;
+        background: linear-gradient(135deg, #075e54, #128c7e);
+        box-shadow: 0 8px 22px rgba(0, 0, 0, .22);
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .whatsapp-group:active {
+        transform: scale(.98);
+    }
+
+    .whatsapp-icon {
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #25d366;
+        color: #fff;
+        font-size: 24px;
+        font-weight: 900;
+    }
+
+    .whatsapp-group strong {
+        display: block;
+        font-size: 13px;
+        letter-spacing: .4px;
+    }
+
+    .whatsapp-group small {
+        display: block;
+        margin-top: 4px;
+        color: rgba(255,255,255,.78);
+        font-size: 11px;
+    }
+
+    .whatsapp-arrow {
+        margin-left: auto;
+        font-size: 22px;
+        font-weight: 900;
+    }
+
+</style>
+
+<style>
+.stake-option {
+  display:flex !important;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.play-now {
+  background:linear-gradient(135deg,#00e676,#00bfa5);
+  color:#06111f;
+  padding:9px 13px;
+  border-radius:10px;
+  font-size:11px;
+  font-weight:900;
+  white-space:nowrap;
+  box-shadow:0 5px 15px rgba(0,230,118,.22);
+}
+</style>
+
+<style>
+.stake-option{
+display:flex!important;
+align-items:center!important;
+justify-content:space-between!important;
+width:100%!important;
+box-sizing:border-box!important;
+}
+.play-now{
+display:inline-block!important;
+background:linear-gradient(135deg,#00e676,#00bfa5)!important;
+color:#06111f!important;
+padding:10px 14px!important;
+border-radius:10px!important;
+font-size:11px!important;
+font-weight:900!important;
+white-space:nowrap!important;
+}
+</style>
+
+<style>
+.stake-option{
+    position:relative !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    padding-right:18px !important;
+}
+.play-now{
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    background:linear-gradient(135deg,#00e676,#00bfa5) !important;
+    color:#06111f !important;
+    padding:10px 12px !important;
+    min-width:78px !important;
+    border-radius:9px !important;
+    font-size:10px !important;
+    font-weight:900 !important;
+    letter-spacing:.4px !important;
+    white-space:nowrap !important;
+    box-shadow:0 4px 12px rgba(0,230,118,.25) !important;
+}
+@media(max-width:480px){
+    .play-now{
+        min-width:72px !important;
+        padding:9px 8px !important;
+        font-size:9px !important;
+    }
+}
+</style>
+
+<style>
+.stakes .stake{
+    display:flex !important;
+    align-items:center !important;
+    gap:10px !important;
+}
+.stakes .stake > div{
+    flex:1 !important;
+}
+.stakes .stake > span{
+    margin-left:auto !important;
+}
+.play-now{
+    border:0 !important;
+    background:linear-gradient(135deg,#00e676,#00bfa5) !important;
+    color:#06111f !important;
+    padding:10px 12px !important;
+    border-radius:9px !important;
+    font-size:10px !important;
+    font-weight:900 !important;
+    white-space:nowrap !important;
+    cursor:pointer !important;
+}
+</style>
+
+<style>
+.withdraw-modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.78);
+    backdrop-filter:blur(8px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:99999;
+    padding:20px;
+}
+.withdraw-modal.show{display:flex}
+.withdraw-box{
+    width:100%;
+    max-width:430px;
+    background:linear-gradient(145deg,#101b42,#17104a);
+    border:1px solid #3156a8;
+    border-radius:24px;
+    padding:24px;
+    box-shadow:0 20px 60px rgba(0,0,0,.55);
+}
+.withdraw-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+.withdraw-head h2{
+    margin:0;
+    color:#fff;
+    font-size:24px;
+}
+.withdraw-close{
+    border:0;
+    background:#26345f;
+    color:#fff;
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    font-size:24px;
+    cursor:pointer;
+}
+.withdraw-field{
+    margin-bottom:15px;
+}
+.withdraw-field label{
+    display:block;
+    color:#aebbd8;
+    font-size:13px;
+    font-weight:700;
+    margin-bottom:7px;
+}
+.withdraw-field input,
+.withdraw-field select{
+    width:100%;
+    box-sizing:border-box;
+    padding:14px;
+    border-radius:12px;
+    border:1px solid #304b86;
+    background:#0b1535;
+    color:#fff;
+    font-size:15px;
+    outline:none;
+}
+.withdraw-field input:focus,
+.withdraw-field select:focus{
+    border-color:#00d9ff;
+}
+.withdraw-submit{
+    width:100%;
+    border:0;
+    padding:15px;
+    border-radius:13px;
+    background:linear-gradient(135deg,#ff3158,#ff8a00);
+    color:#fff;
+    font-weight:900;
+    font-size:15px;
+    cursor:pointer;
+    margin-top:5px;
+}
+.withdraw-note{
+    text-align:center;
+    color:#8392b5;
+    font-size:12px;
+    margin-top:13px;
+}
+</style>
+
+<style>
+.addfund-modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.8);
+    backdrop-filter:blur(8px);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:99999;
+    padding:18px;
+}
+.addfund-modal.show{display:flex}
+.addfund-box{
+    width:100%;
+    max-width:430px;
+    max-height:92vh;
+    overflow:auto;
+    background:linear-gradient(145deg,#101b42,#17104a);
+    border:1px solid #3156a8;
+    border-radius:22px;
+    padding:22px;
+    box-sizing:border-box;
+}
+.addfund-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
+}
+.addfund-head h2{margin:0;color:#fff}
+.addfund-close{
+    border:0;
+    background:#26345f;
+    color:#fff;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    font-size:23px;
+}
+.addfund-info{
+    background:#0b1535;
+    border:1px solid #304b86;
+    border-radius:14px;
+    padding:14px;
+    margin-bottom:16px;
+    color:#fff;
+}
+.addfund-info strong{
+    display:block;
+    color:#00e676;
+    font-size:20px;
+    margin-top:4px;
+}
+.addfund-field{margin-bottom:14px}
+.addfund-field label{
+    display:block;
+    color:#aebbd8;
+    font-size:13px;
+    font-weight:700;
+    margin-bottom:7px;
+}
+.addfund-field input{
+    width:100%;
+    box-sizing:border-box;
+    padding:13px;
+    border-radius:11px;
+    border:1px solid #304b86;
+    background:#0b1535;
+    color:#fff;
+    font-size:15px;
+}
+.addfund-submit{
+    width:100%;
+    border:0;
+    padding:14px;
+    border-radius:12px;
+    background:linear-gradient(135deg,#00e676,#00bfa5);
+    color:#06111f;
+    font-weight:900;
+    font-size:14px;
+}
+</style>
+<style>
+.payment-method{
+    text-align:center !important;
+    padding:18px !important;
+    background:linear-gradient(135deg,#102653,#21134f)!important;
+    border:1px solid #3c65b5!important;
+}
+.payment-label{
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:1.5px;
+    color:#8fa8d8;
+    margin-bottom:6px;
+}
+.payment-brand{
+    font-size:23px;
+    font-weight:900;
+    color:#fff;
+}
+.payment-name{
+    font-size:14px;
+    font-weight:800;
+    color:#00e6a8;
+    margin-top:4px;
+}
+.payment-number{
+    display:inline-block;
+    margin-top:9px;
+    padding:9px 15px;
+    border-radius:10px;
+    background:#08132f;
+    color:#fff;
+    font-size:18px;
+    font-weight:900;
+    letter-spacing:1px;
+}
+.payment-copy{
+    margin-top:9px;
+    font-size:11px;
+    color:#9baad0;
+}
+</style></head>
+
+<body>
+
+<div class="app">
+
+<header class="header">
+
+<a href="/dashboard" class="brand">
+    <div class="logo"><span>W</span></div>
+    WHOT <span>ARENA</span>
+</a>
+
+<div class="header-right">
+    <a href="/logout" class="logout">LOGOUT</a>
+</div>
+
+</header>
+
+
+<section class="welcome">
+    <small>YOUR ARENA</small>
+    <h1>Welcome back, <span>{{ user['username'] }}</span> 👋</h1>
+    <p>Your next match is waiting for you.</p>
+</section>
+
+
+<!-- WALLET -->
+<section class="balance">
+
+    <div class="balance-label">AVAILABLE BALANCE</div>
+
+    <div class="balance-amount">
+        ₦{{ "{:,}".format(user['balance']) }}
+    </div>
+
+    <div class="balance-actions">
+        <a href="javascript:void(0)" class="action add" onclick="openAddFunds()">＋ ADD FUNDS</a>
+        <a href="javascript:void(0)" class="action cash" onclick="openWithdraw()">CASH OUT</a>
+    </div>
+
+    <a href="/whatsapp" class="whatsapp-group">
+        <span class="whatsapp-icon">◉</span>
+        <span>
+            <strong>JOIN OUR WHATSAPP GROUP</strong>
+            <small>Join the WHOT Arena community</small>
+        </span>
+        <span class="whatsapp-arrow">→</span>
+    </a>
+
+</section>
+
+
+<div class="grid">
+
+<!-- PLAY -->
+<section class="panel">
+
+<div class="panel-title">
+    <h2>🎮 Play</h2>
+    <span>CHOOSE YOUR MODE</span>
+</div>
+
+<div class="play-grid">
+
+<a href="javascript:void(0)" onclick="openStakes()" class="play-card">
+    <span class="play-link">PLAY →</span>
+    <div class="play-icon">⚡</div>
+    <h3>Normal Games</h3>
+    <p>Find a player and enter a head-to-head WHOT match.</p>
+</a>
+
+<a href="/history" class="play-card red">
+    <span class="play-link">VIEW →</span>
+    <div class="play-icon">📜</div>
+    <h3>History</h3>
+    <p>View deposits, withdrawals, game entries and winnings.</p>
+</a>
+
+<a href="/tournament" class="play-card purple">
+    <span class="play-link">VIEW →</span>
+    <div class="play-icon">🏆</div>
+    <h3>Tournaments</h3>
+    <p>Join scheduled Arena competitions.</p>
+</a>
+
+<a href="#" class="play-card gold">
+    <span class="play-link">VIEW →</span>
+    <div class="play-icon">👑</div>
+    <h3>Champion Board</h3>
+    <p>See notable Arena players and achievements.</p>
+</a>
+
+</div>
+
+</section>
+
+
+
+</div>
+
+
+<!-- BONUS -->
+<section class="bonus">
+
+<div class="bonus-top">
+    <h3>🎁 Welcome Bonus</h3>
+    <div class="bonus-value">₦75</div>
+</div>
+
+<p>
+    Your ₦75 welcome bonus is available according to the
+    applicable bonus conditions.
+</p>
+
+</section>
+
+
+<!-- PROFILE -->
+<section class="profile">
+
+<div class="profile-item">
+    <label>USERNAME</label>
+    <strong>{{ user['username'] }}</strong>
+</div>
+
+<div class="profile-item">
+    <label>PHONE NUMBER</label>
+    <strong>{{ user['phone'] }}</strong>
+</div>
+
+</section>
+
+
+<!-- REFERRAL -->
+<section class="referral">
+
+<h3>👥 Invite & Earn</h3>
+
+<p>
+    Invite friends to WHOT Arena and earn ₦25 for each
+    qualifying referral under the referral rules.
+</p>
+
+<a href="/referral" class="referral-button">VIEW MY REFERRAL CODE</a>
+
+</section>
+
+
+
+<!-- STAKE SELECTOR -->
+<div id="stakeModal" class="stake-modal">
+    <div class="stake-box">
+
+        <button class="stake-close" onclick="closeStakes()">×</button>
+
+        <div class="stake-kicker">NORMAL GAMES</div>
+        <h2>Choose Your Stake</h2>
+        <p>Select the amount you want to play with.</p>
+
+        <div class="stakes">
+
+            <a href="#" class="stake">
+                <div>
+                    <strong>₦30</strong>
+                    <small>Entry stake</small>
+                </div>
+                <span>₦50</span><button type="button" class="play-now" onclick="playStake(30,event)">PLAY NOW</button>
+            </a>
+
+            <a href="#" class="stake">
+                <div>
+                    <strong>₦50</strong>
+                    <small>Entry stake</small>
+                </div>
+                <span>₦85</span><button type="button" class="play-now" onclick="playStake(50,event)">PLAY NOW</button>
+            </a>
+
+            <a href="#" class="stake">
+                <div>
+                    <strong>₦100</strong>
+                    <small>Entry stake</small>
+                </div>
+                <span>₦180</span><button type="button" class="play-now" onclick="playStake(100,event)">PLAY NOW</button>
+            </a>
+
+            <a href="#" class="stake">
+                <div>
+                    <strong>₦200</strong>
+                    <small>Entry stake</small>
+                </div>
+                <span>₦350</span><button type="button" class="play-now" onclick="playStake(200,event)">PLAY NOW</button>
+            </a>
+
+            <a href="#" class="stake">
+                <div>
+                    <strong>₦500</strong>
+                    <small>Entry stake</small>
+                </div>
+                <span>₦850</span><button type="button" class="play-now" onclick="playStake(500,event)">PLAY NOW</button>
+            </a>
+
+            <a href="#" class="stake">
+                <div>
+                    <strong>₦1,000</strong>
+                    <small>Entry stake</small>
+                </div>
+                <span>₦1,850</span><button type="button" class="play-now" onclick="playStake(1000,event)">PLAY NOW</button>
+            </a>
+
+        </div>
+
+        <div class="stake-note">
+            🛡️ Your selected stake is held safely while matchmaking.
+        </div>
+
+    </div>
+</div>
+
+<script>
+function openStakes(){
+    document.getElementById("stakeModal").classList.add("show");
+}
+
+function closeStakes(){
+    document.getElementById("stakeModal").classList.remove("show");
+}
+
+document.getElementById("stakeModal").addEventListener("click", function(e){
+    if(e.target === this) closeStakes();
+});
+</script>
+
+<footer class="footer">
+    WHOT ARENA • PLAY • COMPETE • WIN<br>
+    <span style="display:block;margin-top:6px">© 2026 WHOT Arena</span>
+</footer>
+
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".stake-option").forEach(function(row) {
+        if (row.querySelector(".play-now")) return;
+
+        var stakeText = "";
+        var strong = row.querySelector("strong");
+
+        if (strong) {
+            stakeText = strong.textContent.replace(/[₦,\s]/g, "");
+        }
+
+        if (!stakeText) {
+            var text = row.textContent.match(/₦\s*[\d,]+/);
+            if (text) stakeText = text[0].replace(/[₦,\s,]/g, "");
+        }
+
+        var btn = document.createElement("span");
+        btn.className = "play-now";
+        btn.textContent = "PLAY NOW";
+
+        btn.addEventListener("click", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (stakeText) {
+                window.location.href = "/matchmaking?stake=" + stakeText;
+            }
+        });
+
+        row.appendChild(btn);
+    });
+});
+</script>
+
+<script>
+function playStake(stake, event) {
+    event.preventDefault();
+    event.stopPropagation();
+    window.location.href = "/matchmaking?stake=" + stake;
+}
+</script>
+
+<div class="withdraw-modal" id="withdrawModal">
+    <div class="withdraw-box">
+        <div class="withdraw-head">
+            <h2>Cash Out</h2>
+            <button class="withdraw-close" type="button" onclick="closeWithdraw()">×</button>
+        </div>
+
+        <form onsubmit="submitWithdraw(event)">
+            <div class="withdraw-field">
+                <label>Bank Name</label>
+                <input type="text" id="withdrawBank" placeholder="Enter bank name" required>
+            </div>
+
+            <div class="withdraw-field">
+                <label>Account Name</label>
+                <input type="text" id="withdrawName"
+                       placeholder="Enter account name" required>
+            </div>
+
+            <div class="withdraw-field">
+                <label>Account Number</label>
+                <input type="text" id="withdrawAccount" inputmode="numeric"
+                       maxlength="10" placeholder="Enter 10-digit account number" required>
+            </div>
+
+            <div class="withdraw-field">
+                <label>Amount</label>
+                <input type="number" id="withdrawAmount"
+                       min="200" step="1" placeholder="Minimum ₦200" required>
+            </div>
+
+            <button class="withdraw-submit" type="submit">
+                SUBMIT WITHDRAWAL
+            </button>
+
+            <div class="withdraw-note">
+                Minimum cash out: ₦200 • Withdrawal will be processed securely.
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openWithdraw(){
+    document.getElementById("withdrawModal").classList.add("show");
+}
+
+function closeWithdraw(){
+    document.getElementById("withdrawModal").classList.remove("show");
+}
+
+async function submitWithdraw(e){
+    e.preventDefault();
+
+    const bank = document.getElementById("withdrawBank").value.trim();
+    const name = document.getElementById("withdrawName").value.trim();
+    const account = document.getElementById("withdrawAccount").value.trim();
+    const amount = Number(document.getElementById("withdrawAmount").value);
+
+    if(!bank){
+        alert("Please enter your bank name.");
+        return;
+    }
+
+    if(!name){
+        alert("Please enter the account name.");
+        return;
+    }
+
+    if(account.length !== 10 || !/^\d{10}$/.test(account)){
+        alert("Please enter a valid 10-digit account number.");
+        return;
+    }
+
+    if(amount < 200){
+        alert("Minimum withdrawal is ₦200.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("bank_name", bank);
+    formData.append("account_name", name);
+    formData.append("account_number", account);
+    formData.append("amount", amount);
+
+    try{
+        const response = await fetch("/withdraw", {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if(!response.ok || !result.success){
+            alert(result.message || "Withdrawal submission failed.");
+            return;
+        }
+
+        alert("Withdrawal submitted successfully. Admin will review your request.");
+        closeWithdraw();
+        location.reload();
+
+    }catch(error){
+        alert("Unable to submit withdrawal. Please try again.");
+    }
+}
+
+document.addEventListener("click", function(e){
+    let el = e.target.closest("a");
+
+    if(!el) return;
+
+    const text = el.textContent.trim().toUpperCase();
+
+    if(text.includes("CASH OUT")){
+        e.preventDefault();
+        e.stopPropagation();
+        openWithdraw();
+    }
+});
+
+document.getElementById("withdrawModal")?.addEventListener("click", function(e){
+    if(e.target === this) closeWithdraw();
+});
+</script>
+
+<div class="addfund-modal" id="addFundModal">
+  <div class="addfund-box">
+    <div class="addfund-head">
+      <h2>Add Funds</h2>
+      <button type="button" class="addfund-close" onclick="closeAddFunds()">×</button>
+    </div>
+
+    <div class="addfund-info payment-method">
+      <div class="payment-label">PAYMENT METHOD</div>
+      <div class="payment-brand">PalmPay</div>
+      <div class="payment-name">V.M.E</div>
+      <div class="payment-number">8131602092</div>
+      <div class="payment-copy">Send your payment to this PalmPay account</div>
+    </div>
+
+    <form onsubmit="submitAddFunds(event)">
+      <div class="addfund-field">
+        <label>Amount</label>
+        <input type="number" id="depositAmount" min="100" step="1"
+               placeholder="Minimum ₦100" required>
+      </div>
+
+      <div class="addfund-field">
+        <label>Name of Sender</label>
+        <input type="text" id="senderName"
+               placeholder="Enter sender name" required>
+      </div>
+
+      <div class="addfund-field">
+        <label>Payment Screenshot</label>
+        <input type="file" id="paymentScreenshot"
+               accept="image/*" required>
+      </div>
+
+      <button type="submit" class="addfund-submit">
+        SUBMIT PAYMENT
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+function openAddFunds(){
+    document.getElementById("addFundModal").classList.add("show");
+}
+function closeAddFunds(){
+    document.getElementById("addFundModal").classList.remove("show");
+}
+async function submitAddFunds(e){
+    e.preventDefault();
+
+    const amount = Number(document.getElementById("depositAmount").value);
+    const sender = document.getElementById("senderName").value.trim();
+    const screenshot = document.getElementById("paymentScreenshot").files[0];
+
+    if(amount < 100){
+        alert("Minimum deposit is ₦100.");
+        return;
+    }
+
+    if(!sender || !screenshot){
+        alert("Please enter the sender name and upload the payment screenshot.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("amount", amount);
+    formData.append("sender_name", sender);
+    formData.append("screenshot", screenshot);
+
+    try{
+        const response = await fetch("/deposit", {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if(!response.ok || !result.success){
+            alert(result.message || "Deposit submission failed.");
+            return;
+        }
+
+        alert("Payment submitted successfully. Admin will verify your deposit.");
+        closeAddFunds();
+
+    }catch(error){
+        alert("Unable to submit payment. Please try again.");
+    }
+}
+</script>
+
+<script>
+function getReferralLink(){
+    const input = document.getElementById("myReferralLink");
+    return input ? input.value : "";
+}
+
+async function copyReferralLink(){
+    const link = getReferralLink();
+
+    if(!link){
+        alert("Referral link is not available.");
+        return;
+    }
+
+    try{
+        await navigator.clipboard.writeText(link);
+        alert("Referral link copied!");
+    }catch(error){
+        const input = document.getElementById("myReferralLink");
+        input.focus();
+        input.select();
+        document.execCommand("copy");
+        alert("Referral link copied!");
+    }
+}
+
+async function shareReferralLink(){
+    const link = getReferralLink();
+
+    if(!link){
+        alert("Referral link is not available.");
+        return;
+    }
+
+    const text =
+        "Join me on WHOT Arena — Play • Compete • Win!\n\n" +
+        "Create your account using my referral link:\n" +
+        link;
+
+    if(navigator.share){
+        try{
+            await navigator.share({
+                title: "Join WHOT Arena",
+                text: text,
+                url: link
+            });
+        }catch(error){
+            if(error.name !== "AbortError"){
+                await copyReferralLink();
+            }
+        }
+    }else{
+        await copyReferralLink();
+    }
+}
+</script>
+
+
+<div id="challengePlayersModal" style="
+display:none;
+position:fixed;
+inset:0;
+z-index:9999;
+background:rgba(2,6,20,.88);
+padding:20px;
+align-items:center;
+justify-content:center;
+">
+    <div style="
+    width:100%;
+    max-width:430px;
+    max-height:88vh;
+    overflow:auto;
+    background:linear-gradient(145deg,#101d42,#090f25);
+    border:1px solid #31549b;
+    border-radius:20px;
+    padding:18px;
+    color:#fff;
+    ">
+
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+                <h2 style="margin:0;font-size:20px;">⚔️ Active Players</h2>
+                <p style="margin:6px 0 0;color:#8fa4d0;font-size:12px;">
+                    Challenge any player who is online.
+                </p>
+            </div>
+
+            <button type="button"
+                onclick="closeChallengePlayers()"
+                style="
+                width:40px;height:40px;border:0;border-radius:12px;
+                background:#182653;color:#fff;font-size:22px;
+                ">×</button>
+        </div>
+
+        <div id="challengeIncoming" style="margin-top:15px;"></div>
+
+        <div style="
+        margin-top:15px;
+        padding:11px;
+        border-radius:12px;
+        background:#0b1634;
+        color:#78eaff;
+        font-size:11px;
+        font-weight:800;
+        ">
+            🟢 ACTIVE PLAYERS
+        </div>
+
+        <div id="activePlayersList" style="margin-top:10px;">
+            <div style="padding:20px;text-align:center;color:#8fa4d0;font-size:12px;">
+                Finding active players...
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="challengeStakeModal" style="
+display:none;
+position:fixed;
+inset:0;
+z-index:10000;
+background:rgba(2,6,20,.92);
+padding:20px;
+align-items:center;
+justify-content:center;
+">
+    <div style="
+    width:100%;
+    max-width:360px;
+    background:#0d1735;
+    border:1px solid #31549b;
+    border-radius:20px;
+    padding:20px;
+    color:#fff;
+    ">
+
+        <h2 style="margin:0;">Choose Stake</h2>
+        <p id="challengeTargetName"
+           style="color:#9eafd4;font-size:12px;"></p>
+
+        <select id="challengeStake"
+            style="
+            width:100%;
+            padding:14px;
+            border-radius:12px;
+            border:1px solid #31549b;
+            background:#08112b;
+            color:#fff;
+            font-size:16px;
+            ">
+            <option value="30">₦30</option>
+            <option value="50">₦50</option>
+            <option value="100">₦100</option>
+            <option value="200">₦200</option>
+            <option value="500">₦500</option>
+            <option value="1000">₦1,000</option>
+        </select>
+
+        <button type="button"
+            onclick="sendPlayerChallenge()"
+            style="
+            width:100%;
+            margin-top:12px;
+            padding:14px;
+            border:0;
+            border-radius:12px;
+            background:linear-gradient(135deg,#ff426f,#ff1744);
+            color:#fff;
+            font-weight:900;
+            ">
+            SEND CHALLENGE
+        </button>
+
+        <button type="button"
+            onclick="closeChallengeStake()"
+            style="
+            width:100%;
+            margin-top:8px;
+            padding:12px;
+            border:1px solid #294b88;
+            border-radius:12px;
+            background:#111f43;
+            color:#fff;
+            font-weight:800;
+            ">
+            CANCEL
+        </button>
+    </div>
+</div>
+
+<script>
+let challengeTargetId = null;
+
+function openChallengePlayers(e){
+    if(e) e.preventDefault();
+
+    const modal = document.getElementById("challengePlayersModal");
+    modal.style.display = "flex";
+
+    loadActivePlayers();
+    loadIncomingChallenges();
+}
+
+function closeChallengePlayers(){
+    document.getElementById("challengePlayersModal").style.display = "none";
+}
+
+function openChallengeStake(id, username){
+    challengeTargetId = id;
+
+    document.getElementById("challengeTargetName").textContent =
+        "Challenge " + username;
+
+    document.getElementById("challengeStakeModal").style.display = "flex";
+}
+
+function closeChallengeStake(){
+    challengeTargetId = null;
+    document.getElementById("challengeStakeModal").style.display = "none";
+}
+
+async function loadActivePlayers(){
+    const box = document.getElementById("activePlayersList");
+
+    try{
+        const response = await fetch("/players/active");
+        const data = await response.json();
+
+        if(!data.success || !data.players.length){
+            box.innerHTML = `
+                <div style="
+                    padding:22px;
+                    text-align:center;
+                    color:#8fa4d0;
+                    font-size:12px;
+                    ">
+                    No other players are active right now.
+                </div>
+            `;
+            return;
+        }
+
+        box.innerHTML = data.players.map(player => `
+            <div style="
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+                gap:10px;
+                padding:12px;
+                margin-bottom:8px;
+                border-radius:13px;
+                background:#121f44;
+                border:1px solid #263f76;
+                ">
+                <div style="min-width:0;">
+                    <div style="font-weight:900;font-size:13px;">
+                        🟢 ${escapeChallengeHtml(player.username)}
+                    </div>
+                    <div style="color:#7f94bd;font-size:10px;margin-top:3px;">
+                        ACTIVE NOW
+                    </div>
+                </div>
+
+                <button type="button"
+                    onclick="openChallengeStake(${player.id}, '${escapeChallengeJs(player.username)}')"
+                    style="
+                    flex-shrink:0;
+                    border:0;
+                    border-radius:10px;
+                    padding:10px 12px;
+                    background:#ff315f;
+                    color:#fff;
+                    font-size:10px;
+                    font-weight:900;
+                    ">
+                    CHALLENGE
+                </button>
+            </div>
+        `).join("");
+
+    }catch(error){
+        box.innerHTML = `
+            <div style="padding:20px;text-align:center;color:#ff758f;font-size:12px;">
+                Unable to load active players.
+            </div>
+        `;
+    }
+}
+
+async function loadIncomingChallenges(){
+    const box = document.getElementById("challengeIncoming");
+
+    try{
+        const response = await fetch("/challenge/incoming");
+        const data = await response.json();
+
+        if(!data.success || !data.challenges.length){
+            box.innerHTML = "";
+            return;
+        }
+
+        box.innerHTML = data.challenges.map(c => `
+            <div style="
+                padding:13px;
+                margin-bottom:8px;
+                border-radius:13px;
+                background:#241536;
+                border:1px solid #7b3f91;
+                ">
+                <div style="font-size:12px;font-weight:900;">
+                    ⚔️ ${escapeChallengeHtml(c.challenger)} challenged you
+                </div>
+
+                <div style="color:#ffd75a;font-size:12px;margin-top:5px;">
+                    Stake: ₦${Number(c.stake).toLocaleString()}
+                </div>
+
+                <div style="display:flex;gap:8px;margin-top:10px;">
+                    <button type="button"
+                        onclick="respondChallenge(${c.id}, 'accept')"
+                        style="
+                        flex:1;border:0;border-radius:10px;
+                        padding:10px;background:#00c982;
+                        color:#04101d;font-weight:900;font-size:10px;
+                        ">
+                        ACCEPT
+                    </button>
+
+                    <button type="button"
+                        onclick="respondChallenge(${c.id}, 'decline')"
+                        style="
+                        flex:1;border:1px solid #70405c;
+                        border-radius:10px;padding:10px;
+                        background:#241329;color:#fff;
+                        font-weight:900;font-size:10px;
+                        ">
+                        DECLINE
+                    </button>
+                </div>
+            </div>
+        `).join("");
+
+    }catch(error){
+        box.innerHTML = "";
+    }
+}
+
+async function sendPlayerChallenge(){
+    if(!challengeTargetId) return;
+
+    const stake = document.getElementById("challengeStake").value;
+    const form = new FormData();
+
+    form.append("opponent_id", challengeTargetId);
+    form.append("stake", stake);
+
+    try{
+        const response = await fetch("/challenge/send", {
+            method:"POST",
+            body:form
+        });
+
+        const data = await response.json();
+
+        if(!response.ok || !data.success){
+            alert(data.message || "Unable to send challenge.");
+            return;
+        }
+
+        alert(data.message);
+        closeChallengeStake();
+
+    }catch(error){
+        alert("Unable to send challenge. Please try again.");
+    }
+}
+
+async function respondChallenge(id, action){
+    const form = new FormData();
+    form.append("action", action);
+
+    try{
+        const response = await fetch(
+            "/challenge/" + id + "/respond",
+            {
+                method:"POST",
+                body:form
+            }
+        );
+
+        const data = await response.json();
+
+        if(!response.ok || !data.success){
+            alert(data.message || "Unable to respond.");
+            return;
+        }
+
+        alert(data.message);
+        loadIncomingChallenges();
+
+    }catch(error){
+        alert("Unable to respond to challenge.");
+    }
+}
+
+function escapeChallengeHtml(value){
+    return String(value)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
+
+function escapeChallengeJs(value){
+    return String(value)
+        .replaceAll("\\","\\\\")
+        .replaceAll("'","\\'");
+}
+
+/* Keep this player's presence fresh. */
+async function updatePlayerPresence(){
+    try{
+        await fetch("/players/presence", {
+            method:"POST"
+        });
+    }catch(error){}
+}
+
+updatePlayerPresence();
+setInterval(updatePlayerPresence, 15000);
+
+</script>
+
+</body>
+</html>

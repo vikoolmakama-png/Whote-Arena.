@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WHOT Arena — Tournament</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+html,body{
+    margin:0;
+    min-height:100%;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background:
+        radial-gradient(circle at 50% 20%, #172d68 0%, #09122d 42%, #040813 100%);
+    color:#fff;
+    font-family:Arial,sans-serif;
+    overflow:hidden;
+}
+
+.loader-page{
+    width:100%;
+    max-width:430px;
+    text-align:center;
+}
+
+.logo{
+    width:86px;
+    height:86px;
+    margin:0 auto 24px;
+    border-radius:24px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(145deg,#13285d,#0b1534);
+    border:1px solid rgba(76,220,255,.35);
+    box-shadow:0 0 35px rgba(0,190,255,.15);
+    font-size:42px;
+    animation:pulse 2s ease-in-out infinite;
+}
+
+h1{
+    margin:0;
+    font-size:27px;
+    font-weight:900;
+    letter-spacing:.5px;
+}
+
+.sub{
+    margin-top:10px;
+    color:#9eafd4;
+    font-size:13px;
+}
+
+.loader{
+    width:100%;
+    height:6px;
+    margin:30px auto 18px;
+    border-radius:20px;
+    background:#101d3d;
+    overflow:hidden;
+    border:1px solid #1e3768;
+}
+
+.bar{
+    width:35%;
+    height:100%;
+    border-radius:20px;
+    background:linear-gradient(90deg,#35d9ff,#7167ff,#35d9ff);
+    animation:loading 1.5s ease-in-out infinite;
+}
+
+.status{
+    color:#6fe7ff;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.8px;
+}
+
+.back{
+    display:inline-block;
+    margin-top:28px;
+    padding:11px 18px;
+    border-radius:12px;
+    text-decoration:none;
+    color:#fff;
+    background:#111f43;
+    border:1px solid #294b88;
+    font-size:12px;
+    font-weight:800;
+}
+
+@keyframes loading{
+    0%{
+        transform:translateX(-120%);
+    }
+    100%{
+        transform:translateX(320%);
+    }
+}
+
+@keyframes pulse{
+    0%,100%{
+        transform:scale(1);
+        box-shadow:0 0 35px rgba(0,190,255,.12);
+    }
+    50%{
+        transform:scale(1.05);
+        box-shadow:0 0 45px rgba(0,190,255,.25);
+    }
+}
+
+@media(prefers-reduced-motion:reduce){
+    .logo,
+    .bar{
+        animation:none;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="loader-page">
+
+    <div class="logo">🏆</div>
+
+    <h1>TOURNAMENT</h1>
+
+    <div class="sub">
+        Tournament arena is being prepared.
+    </div>
+
+    <div class="loader">
+        <div class="bar"></div>
+    </div>
+
+    <div class="status">
+        LOADING TOURNAMENT...
+    </div>
+
+    <a href="/dashboard" class="back">← BACK TO DASHBOARD</a>
+
+</div>
+
+</body>
+</html>

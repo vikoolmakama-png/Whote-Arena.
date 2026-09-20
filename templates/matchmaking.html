@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Finding Player</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:linear-gradient(160deg,#07152f,#102c55);color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:20px}
+.box{width:100%;max-width:420px;text-align:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:30px 22px}
+.icon{font-size:64px}
+h1{margin:8px 0;font-size:28px}
+.stake{font-size:26px;font-weight:bold;margin:20px 0}
+.count{font-size:76px;font-weight:900}
+.status{min-height:50px;line-height:1.5;color:#d8e4f5}
+.loader{width:55px;height:55px;margin:22px auto;border:5px solid rgba(255,255,255,.18);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cancel{display:inline-block;margin-top:12px;color:#b9c8df;text-decoration:none}
+.success{font-size:20px;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="box">
+    <div class="icon">🎴</div>
+    <h1>Finding Player</h1>
+    <div class="stake">₦{{ "{:,}".format(stake) }}</div>
+
+    <div class="count" id="count">10</div>
+
+    <div class="status" id="status">
+        Searching for another player with the same stake...
+    </div>
+
+    <div class="loader" id="loader"></div>
+
+    <a class="cancel" href="{{ url_for('dashboard') }}">Cancel</a>
+</div>
+
+<script>
+const stake = {{ stake|int }};
+let seconds = 10;
+let finished = false;
+
+const countEl = document.getElementById("count");
+const statusEl = document.getElementById("status");
+const loaderEl = document.getElementById("loader");
+
+async function startMatchmaking(){
+    try{
+        const form = new FormData();
+        form.append("stake", stake);
+
+        const response = await fetch("/matchmaking/start", {
+            method:"POST",
+            body:form
+        });
+
+        const data = await response.json();
+
+        if(!data.success){
+            statusEl.textContent = data.message || "Unable to start matchmaking.";
+            finished = true;
+            loaderEl.style.display = "none";
+            return;
+        }
+
+        if(data.matched){
+            finish("player");
+        }
+    }catch(error){
+        statusEl.textContent = "Connection error. Please try again.";
+        finished = true;
+        loaderEl.style.display = "none";
+    }
+}
+
+async function checkMatch(){
+    if(finished) return;
+
+    try{
+        const response = await fetch("/matchmaking/status");
+        const data = await response.json();
+
+        if(data.success && data.matched){
+            finish("player");
+            return;
+        }
+    }catch(error){}
+
+    if(!finished && seconds > 0){
+        setTimeout(checkMatch,1000);
+    }
+}
+
+async function switchToAI(){
+    if(finished) return;
+
+    try{
+        const response = await fetch("/matchmaking/ai", {
+            method:"POST"
+        });
+
+        const data = await response.json();
+
+        if(!data.success){
+            statusEl.textContent = data.message || "Unable to start game.";
+            loaderEl.style.display = "none";
+            return;
+        }
+
+        if(data.type === "player"){
+            finish("player");
+        }else{
+            finish("ai");
+        }
+    }catch(error){
+        statusEl.textContent = "Connection error. Please try again.";
+        loaderEl.style.display = "none";
+    }
+}
+
+function finish(type){
+    if(finished) return;
+
+    finished = true;
+    loaderEl.style.display = "none";
+
+    if(type === "player"){
+        countEl.textContent = "✓";
+        statusEl.innerHTML =
+            '<div class="success">Player found!</div>' +
+            'Starting WHOT match...';
+    }else{
+        countEl.textContent = "✓";
+        statusEl.innerHTML =
+            '<div class="success">Starting WHOT match...</div>';
+    }
+
+    setTimeout(function(){
+        window.location.href = "/normal-game?stake=" + stake;
+    },700);
+}
+
+const timer = setInterval(function(){
+    if(finished){
+        clearInterval(timer);
+        return;
+    }
+
+    seconds--;
+    countEl.textContent = seconds;
+
+    if(seconds <= 0){
+        clearInterval(timer);
+        countEl.textContent = "0";
+        statusEl.textContent = "No player found. Switching to AI...";
+        setTimeout(switchToAI,400);
+    }
+},1000);
+
+startMatchmaking();
+checkMatch();
+</script>
+</body>
+</html>

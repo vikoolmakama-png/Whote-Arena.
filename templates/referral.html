@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Referral Center - WHOT Arena</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    min-height:100vh;
+    font-family:Arial,Helvetica,sans-serif;
+    color:#fff;
+    background:
+        radial-gradient(circle at 15% 10%,#173b9b 0,transparent 32%),
+        radial-gradient(circle at 90% 80%,#6b168f 0,transparent 30%),
+        linear-gradient(145deg,#02091f,#07184a 55%,#02091f);
+    padding:20px 14px 35px;
+}
+
+.page{
+    width:100%;
+    max-width:600px;
+    margin:auto;
+}
+
+.top{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:22px;
+}
+
+.back{
+    width:44px;
+    height:44px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:14px;
+    color:#fff;
+    text-decoration:none;
+    background:rgba(20,45,100,.7);
+    border:1px solid rgba(80,160,255,.25);
+    font-size:22px;
+}
+
+.brand h1{
+    margin:0;
+    font-size:24px;
+}
+
+.brand p{
+    margin:4px 0 0;
+    color:#91a4cc;
+    font-size:13px;
+}
+
+.hero{
+    padding:24px 20px;
+    border-radius:24px;
+    background:linear-gradient(135deg,rgba(28,57,130,.95),rgba(61,20,106,.95));
+    border:1px solid rgba(100,180,255,.25);
+    box-shadow:0 18px 45px rgba(0,0,0,.25);
+    margin-bottom:16px;
+}
+
+.hero h2{
+    margin:0 0 8px;
+    font-size:27px;
+}
+
+.hero p{
+    margin:0;
+    color:#b8c5e5;
+    line-height:1.55;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin-bottom:16px;
+}
+
+.stat{
+    padding:18px 10px;
+    text-align:center;
+    border-radius:18px;
+    background:rgba(8,24,61,.9);
+    border:1px solid rgba(82,142,235,.2);
+}
+
+.stat strong{
+    display:block;
+    font-size:23px;
+    margin-bottom:6px;
+}
+
+.stat span{
+    color:#91a4cc;
+    font-size:11px;
+    text-transform:uppercase;
+}
+
+.card{
+    padding:20px;
+    border-radius:22px;
+    background:rgba(7,20,54,.92);
+    border:1px solid rgba(82,142,235,.22);
+    margin-bottom:16px;
+}
+
+.label{
+    display:block;
+    color:#8fa5d1;
+    font-size:12px;
+    font-weight:bold;
+    margin-bottom:9px;
+    text-transform:uppercase;
+}
+
+.code{
+    font-size:26px;
+    font-weight:800;
+    letter-spacing:2px;
+    color:#ffd52a;
+    margin-bottom:18px;
+}
+
+.link-box{
+    display:flex;
+    gap:8px;
+}
+
+.link{
+    flex:1;
+    min-width:0;
+    padding:14px;
+    border-radius:13px;
+    background:#02091f;
+    border:1px solid rgba(82,142,235,.25);
+    color:#b9c9eb;
+    font-size:12px;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+
+.copy{
+    border:0;
+    border-radius:13px;
+    padding:0 18px;
+    font-weight:800;
+    color:#fff;
+    background:linear-gradient(135deg,#7c3cff,#d52cff);
+}
+
+.copy:active{
+    transform:scale(.98);
+}
+
+.amount{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:17px 0 0;
+    margin-top:17px;
+    border-top:1px solid rgba(130,150,200,.15);
+}
+
+.amount span{
+    color:#94a7cf;
+}
+
+.amount strong{
+    color:#ffd52a;
+    font-size:25px;
+}
+
+.note{
+    color:#8498c1;
+    font-size:12px;
+    line-height:1.5;
+    margin:8px 0 0;
+}
+
+.home{
+    display:block;
+    text-align:center;
+    text-decoration:none;
+    padding:16px;
+    border-radius:15px;
+    color:#fff;
+    font-weight:800;
+    background:linear-gradient(135deg,#147cff,#16b7ff);
+}
+
+@media(max-width:430px){
+    .stats{
+        gap:7px;
+    }
+
+    .stat{
+        padding:15px 6px;
+    }
+
+    .stat strong{
+        font-size:20px;
+    }
+
+    .link-box{
+        flex-direction:column;
+    }
+
+    .copy{
+        height:48px;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="page">
+
+    <div class="top">
+        <a href="/dashboard" class="back">‹</a>
+        <div class="brand">
+            <h1>WHOT Arena</h1>
+            <p>Referral Center</p>
+        </div>
+    </div>
+
+    <section class="hero">
+        <h2>👥 Invite & Earn</h2>
+        <p>
+            Invite friends to WHOT Arena using your personal referral link
+            and earn ₦25 for each qualifying referral.
+        </p>
+    </section>
+
+    <div class="stats">
+        <div class="stat">
+            <strong>{{ referral_count }}</strong>
+            <span>Total Referrals</span>
+        </div>
+
+        <div class="stat">
+            <strong>{{ qualified_referrals }}</strong>
+            <span>Qualified</span>
+        </div>
+
+        <div class="stat">
+            <strong>₦{{ referral_earnings }}</strong>
+            <span>Total Earned</span>
+        </div>
+    </div>
+
+    <section class="card">
+        <span class="label">Your Referral Code</span>
+        <div class="code">{{ user['referral_code'] }}</div>
+
+        <span class="label">Your Referral Link</span>
+
+        <div class="link-box">
+            <div class="link" id="referralLink">{{ referral_link }}</div>
+            <button class="copy" onclick="copyReferral()">COPY</button>
+        </div>
+
+        <div class="amount">
+            <span>Reward per qualifying referral</span>
+            <strong>₦25</strong>
+        </div>
+
+        <p class="note">
+            Referral rewards are credited when the referral meets the
+            applicable qualifying conditions.
+        </p>
+    </section>
+
+    <a href="/dashboard" class="home">← BACK TO DASHBOARD</a>
+
+</div>
+
+<script>
+async function copyReferral(){
+    const link = document.getElementById("referralLink").textContent.trim();
+    const button = document.querySelector(".copy");
+
+    try{
+        await navigator.clipboard.writeText(link);
+        button.textContent = "COPIED ✓";
+
+        setTimeout(function(){
+            button.textContent = "COPY";
+        }, 1800);
+    }catch(error){
+        const area = document.createElement("textarea");
+        area.value = link;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        area.remove();
+
+        button.textContent = "COPIED ✓";
+
+        setTimeout(function(){
+            button.textContent = "COPY";
+        }, 1800);
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,911 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    color: #ffffff;
+
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(28, 67, 105, .75),
+            transparent 34%
+        ),
+        radial-gradient(
+            circle at 0% 45%,
+            rgba(126, 86, 5, .16),
+            transparent 28%
+        ),
+        #030811;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.page {
+    width: 100%;
+    min-height: 100vh;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.header {
+    width: 100%;
+    height: 72px;
+
+    padding:
+        8px
+        max(18px, calc((100% - 1180px) / 2));
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: rgba(2, 8, 16, .88);
+
+    border-bottom:
+        1px solid rgba(255,255,255,.08);
+
+    position: relative;
+    z-index: 10;
+}
+
+.brand-mark {
+    width: 106px;
+    height: 57px;
+    position: relative;
+
+    text-align: center;
+}
+
+.crown {
+    position: absolute;
+    left: 50%;
+    top: -12px;
+
+    transform: translateX(-50%);
+
+    color: #ffd43b;
+    font-size: 22px;
+}
+
+.mini-card {
+    position: absolute;
+
+    top: 5px;
+
+    width: 20px;
+    height: 27px;
+
+    display: grid;
+    place-items: center;
+
+    border: 1px solid white;
+    border-radius: 4px;
+
+    font-size: 10px;
+    font-weight: 900;
+
+    box-shadow: 0 4px 8px rgba(0,0,0,.4);
+}
+
+.mini-red {
+    left: 18px;
+    background: #a91d31;
+    transform: rotate(-13deg);
+}
+
+.mini-black {
+    left: 43px;
+    background: #101b28;
+    color: #ffd43b;
+    z-index: 2;
+}
+
+.mini-gold {
+    right: 18px;
+    background: #d29a18;
+    color: #111;
+    transform: rotate(13deg);
+}
+
+.brand-name {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 31px;
+
+    color: #ffd43b;
+
+    font-size: 21px;
+    font-weight: 1000;
+    letter-spacing: -1px;
+
+    text-shadow:
+        2px 2px 0 #674600;
+}
+
+.brand-sub {
+    position: absolute;
+
+    left: 27px;
+    top: 51px;
+
+    width: 52px;
+
+    padding: 2px 0;
+
+    border-radius: 3px;
+
+    background: linear-gradient(#ffffff,#aab4c0);
+
+    color: #101a27;
+
+    font-size: 7px;
+    font-weight: 1000;
+    letter-spacing: 2px;
+}
+
+.header-login {
+    padding: 10px 17px;
+
+    border:
+        1px solid rgba(255,211,48,.5);
+
+    border-radius: 22px;
+
+    color: #ffd43b;
+
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .5px;
+}
+
+
+/* =========================
+   MAIN
+========================= */
+
+main {
+    width: min(1180px, 100%);
+    margin: auto;
+}
+
+
+/* =========================
+   HERO
+========================= */
+
+.hero {
+    width: 100%;
+
+    padding:
+        35px
+        18px
+        42px;
+
+    text-align: center;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hero-badge {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    color: #ffd43b;
+
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 2.5px;
+}
+
+.hero-badge span {
+    width: 18px;
+    height: 1px;
+
+    background: #ffd43b;
+}
+
+.hero h1 {
+    margin-top: 16px;
+
+    font-size: clamp(52px, 15vw, 92px);
+
+    line-height: .82;
+
+    font-weight: 1000;
+
+    letter-spacing: -4px;
+}
+
+.hero h1 em {
+    color: #ffd43b;
+    font-style: normal;
+
+    text-shadow:
+        3px 4px 0 #654600;
+}
+
+.hero-description {
+    width: min(460px, 94%);
+
+    margin-top: 20px;
+
+    color: #94a9bd;
+
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+
+/* =========================
+   MAIN LOGO
+========================= */
+
+.arena-logo {
+    width: min(340px, 88vw);
+    height: 300px;
+
+    margin-top: 28px;
+
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding-top: 38px;
+
+    border:
+        1px solid rgba(255,210,49,.65);
+
+    border-radius:
+        45%
+        45%
+        24px
+        24px;
+
+    background:
+        radial-gradient(
+            circle at 50% 30%,
+            #244463,
+            #091525 62%
+        );
+
+    box-shadow:
+        0 25px 70px rgba(0,0,0,.55),
+        0 0 50px rgba(255,203,40,.08);
+
+    overflow: visible;
+}
+
+.logo-glow {
+    position: absolute;
+
+    width: 180px;
+    height: 180px;
+
+    top: 65px;
+
+    border-radius: 50%;
+
+    background: rgba(255,211,47,.08);
+
+    filter: blur(30px);
+
+    pointer-events: none;
+}
+
+.logo-crown {
+    position: absolute;
+
+    top: -48px;
+
+    color: #ffd43b;
+
+    font-size: 61px;
+
+    text-shadow:
+        0 5px 0 #765000,
+        0 0 25px rgba(255,210,45,.18);
+}
+
+.logo-cards {
+    position: relative;
+
+    height: 82px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card {
+    width: 53px;
+    height: 76px;
+
+    margin-left: -10px;
+
+    border: 3px solid #fff;
+    border-radius: 7px;
+
+    display: grid;
+    place-items: center;
+
+    font-size: 28px;
+    font-weight: 1000;
+
+    box-shadow:
+        0 8px 15px rgba(0,0,0,.45);
+}
+
+.card:first-child {
+    margin-left: 0;
+    transform: rotate(-14deg);
+}
+
+.card:nth-child(2) {
+    transform: rotate(-5deg);
+    z-index: 2;
+}
+
+.card:nth-child(3) {
+    transform: rotate(5deg);
+    z-index: 3;
+}
+
+.card:last-child {
+    transform: rotate(14deg);
+    z-index: 1;
+}
+
+.card-red {
+    background: #ad2033;
+}
+
+.card-dark {
+    background: #111a27;
+    color: #ffd43b;
+}
+
+.card-gold {
+    background: #d59c18;
+    color: #111;
+}
+
+.card-green {
+    background: #13835a;
+}
+
+.logo-title {
+    position: relative;
+
+    margin-top: 8px;
+
+    color: #ffd43b;
+
+    font-size: 62px;
+    line-height: .8;
+
+    font-weight: 1000;
+
+    letter-spacing: -4px;
+
+    text-shadow:
+        3px 4px 0 #684700;
+}
+
+.logo-ribbon {
+    position: relative;
+
+    margin-top: 7px;
+
+    width: 190px;
+
+    padding: 8px 5px;
+
+    border-radius: 6px;
+
+    background:
+        linear-gradient(
+            #ffffff,
+            #aab4c0
+        );
+
+    color: #162130;
+
+    font-size: 21px;
+    font-weight: 1000;
+
+    letter-spacing: 6px;
+
+    box-shadow:
+        0 4px 0 #5e6978;
+}
+
+.logo-line {
+    margin-top: 16px;
+
+    color: #d1dbe5;
+
+    font-size: 8px;
+    font-weight: 900;
+
+    letter-spacing: 2.5px;
+}
+
+
+/* =========================
+   BUTTONS
+========================= */
+
+.actions {
+    width: min(390px, 100%);
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+
+    margin-top: 25px;
+}
+
+.primary-button {
+    width: 100%;
+
+    min-height: 53px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 7px 9px 7px 22px;
+
+    border-radius: 28px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffe96a,
+            #e9ad16
+        );
+
+    color: #07101a;
+
+    font-size: 12px;
+    font-weight: 1000;
+
+    box-shadow:
+        0 12px 30px rgba(220,164,20,.16);
+}
+
+.primary-button strong {
+    width: 37px;
+    height: 37px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 50%;
+
+    background: #07101a;
+
+    color: #ffd43b;
+
+    font-size: 18px;
+}
+
+.secondary-button {
+    width: 100%;
+
+    min-height: 47px;
+
+    display: grid;
+    place-items: center;
+
+    border:
+        1px solid #2b4964;
+
+    border-radius: 25px;
+
+    color: #b2c3d2;
+
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .8px;
+
+    background: rgba(8,24,40,.7);
+}
+
+
+/* =========================
+   TRUST
+========================= */
+
+.trust {
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+
+    gap: 24px;
+
+    margin-top: 25px;
+}
+
+.trust div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 4px;
+}
+
+.trust b {
+    font-size: 17px;
+}
+
+.trust span {
+    color: #6f879e;
+
+    font-size: 9px;
+}
+
+
+/* =========================
+   GAMES
+========================= */
+
+.games {
+    margin:
+        0
+        14px
+        20px;
+
+    padding: 23px 14px;
+
+    border:
+        1px solid #183750;
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #091c30,
+            #06111e
+        );
+}
+
+.section-title {
+    text-align: center;
+}
+
+.section-title small {
+    color: #ffd43b;
+
+    font-size: 8px;
+    font-weight: 900;
+
+    letter-spacing: 2px;
+}
+
+.section-title h2 {
+    margin-top: 5px;
+
+    font-size: 24px;
+}
+
+.section-title p {
+    margin-top: 5px;
+
+    color: #718ba2;
+
+    font-size: 11px;
+}
+
+.stakes {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 8px;
+
+    margin-top: 18px;
+}
+
+.stake {
+    position: relative;
+
+    min-height: 83px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    border:
+        1px solid #254660;
+
+    border-radius: 13px;
+
+    background: #0a1c2f;
+}
+
+.stake b {
+    font-size: 21px;
+}
+
+.stake span {
+    margin-top: 6px;
+
+    color: #ffd43b;
+
+    font-size: 9px;
+    font-weight: 900;
+}
+
+.stake.featured {
+    border-color: rgba(255,211,47,.7);
+
+    box-shadow:
+        inset 0 0 25px rgba(255,211,47,.035);
+}
+
+.stake label {
+    position: absolute;
+
+    top: 6px;
+
+    padding: 3px 7px;
+
+    border-radius: 8px;
+
+    background: #ffd43b;
+
+    color: #101820;
+
+    font-size: 6px;
+    font-weight: 1000;
+}
+
+
+/* =========================
+   FEATURES
+========================= */
+
+.features {
+    display: grid;
+
+    grid-template-columns:
+        1fr;
+
+    gap: 9px;
+
+    padding: 0 14px 35px;
+}
+
+.feature {
+    min-height: 76px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    padding: 14px;
+
+    border:
+        1px solid #17364f;
+
+    border-radius: 15px;
+
+    background: rgba(6,19,32,.8);
+}
+
+.feature-icon {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 12px;
+
+    background: #102a43;
+
+    font-size: 20px;
+}
+
+.feature h3 {
+    font-size: 13px;
+}
+
+.feature p {
+    margin-top: 4px;
+
+    color: #70889f;
+
+    font-size: 10px;
+
+    line-height: 1.45;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+footer {
+    padding: 30px 15px 40px;
+
+    text-align: center;
+
+    border-top:
+        1px solid rgba(255,255,255,.07);
+
+    color: #5f768c;
+}
+
+.footer-brand {
+    color: #ffd43b;
+
+    font-size: 18px;
+    font-weight: 1000;
+}
+
+.footer-brand b {
+    color: white;
+}
+
+footer p {
+    margin-top: 5px;
+
+    font-size: 8px;
+    letter-spacing: 2px;
+}
+
+footer small {
+    display: block;
+
+    margin-top: 13px;
+
+    font-size: 9px;
+}
+
+
+/* =========================
+   SMALL PHONES
+========================= */
+
+@media (max-width: 360px) {
+
+    .header {
+        height: 68px;
+    }
+
+    .hero {
+        padding-top: 29px;
+    }
+
+    .hero h1 {
+        font-size: 49px;
+    }
+
+    .arena-logo {
+        height: 275px;
+        margin-top: 23px;
+    }
+
+    .card {
+        width: 47px;
+        height: 68px;
+    }
+
+    .logo-title {
+        font-size: 55px;
+    }
+
+    .logo-ribbon {
+        width: 170px;
+        font-size: 18px;
+    }
+
+    .trust {
+        gap: 15px;
+    }
+}
+
+
+/* =========================
+   TABLETS / DESKTOP
+========================= */
+
+@media (min-width: 700px) {
+
+    .hero {
+        min-height: 650px;
+
+        display: grid;
+
+        grid-template-columns:
+            1fr 1fr;
+
+        text-align: left;
+
+        padding:
+            65px 35px;
+    }
+
+    .hero-badge {
+        justify-content: flex-start;
+    }
+
+    .hero h1 {
+        font-size: 82px;
+    }
+
+    .hero-description {
+        margin-left: 0;
+    }
+
+    .arena-logo {
+        grid-column: 2;
+        grid-row: 1 / span 5;
+
+        justify-self: center;
+    }
+
+    .actions {
+        margin-left: 0;
+    }
+
+    .trust {
+        justify-content: flex-start;
+    }
+
+    .games {
+        padding: 30px;
+    }
+
+    .stakes {
+        grid-template-columns:
+            repeat(6, minmax(0, 1fr));
+    }
+
+    .features {
+        grid-template-columns:
+            repeat(3, 1fr);
+
+        padding-left: 0;
+        padding-right: 0;
+    }
+}

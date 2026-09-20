@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>History • WHOT Arena</title>
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    background:#06122f;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+    padding:20px 14px 40px;
+}
+.wrap{
+    width:100%;
+    max-width:700px;
+    margin:auto;
+}
+.top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:20px;
+}
+.back{
+    color:#fff;
+    text-decoration:none;
+    border:1px solid #294779;
+    padding:10px 14px;
+    border-radius:12px;
+    background:#0d2048;
+}
+h1{margin:0;font-size:25px}
+.sub{color:#9eadd0;margin:6px 0 22px}
+.history{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+.item{
+    background:linear-gradient(135deg,#0d2350,#10183e);
+    border:1px solid #233e70;
+    border-radius:16px;
+    padding:15px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+.icon{
+    width:45px;
+    height:45px;
+    border-radius:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#172c58;
+    font-size:22px;
+    flex-shrink:0;
+}
+.info{flex:1;min-width:0}
+.title{font-weight:800;font-size:16px}
+.date{font-size:12px;color:#8192b8;margin-top:5px}
+.amount{
+    font-size:17px;
+    font-weight:900;
+    white-space:nowrap;
+}
+.plus{color:#35e39b}
+.minus{color:#ff718c}
+.status{
+    display:inline-block;
+    margin-top:6px;
+    padding:4px 8px;
+    border-radius:20px;
+    font-size:10px;
+    font-weight:800;
+    text-transform:uppercase;
+    background:#26395f;
+    color:#c8d3ec;
+}
+.empty{
+    text-align:center;
+    padding:45px 20px;
+    color:#9eadd0;
+    border:1px dashed #294779;
+    border-radius:18px;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="top">
+    <div>
+        <h1>📜 History</h1>
+        <div class="sub">Your Arena financial and game activity</div>
+    </div>
+    <a class="back" href="/dashboard">← Back</a>
+</div>
+
+<div class="history">
+{% if events %}
+    {% for e in events %}
+    <div class="item">
+
+        <div class="icon">
+            {% if e.type == "deposit" %}💰
+            {% elif e.type == "withdrawal" %}🏦
+            {% elif e.type == "game-win" %}🏆
+            {% else %}🎮{% endif %}
+        </div>
+
+        <div class="info">
+            <div class="title">{{ e.title }}</div>
+            <div>
+                <span class="status">{{ e.status }}</span>
+            </div>
+            <div class="date">{{ e.date }}</div>
+        </div>
+
+        <div class="amount {% if e.sign == '+' %}plus{% else %}minus{% endif %}">
+            {{ e.sign }}₦{{ "%.2f"|format(e.amount) }}
+        </div>
+
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="empty">
+        <div style="font-size:38px;margin-bottom:10px">📜</div>
+        No activity yet.
+    </div>
+{% endif %}
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,1870 @@
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from werkzeug.security import generate_password_hash, check_password_hash
+import sqlite3
+import secrets
+from pathlib import Path
+from urllib.parse import quote
+
+app = Flask(__name__)
+app.secret_key = "whot-arena-change-this-secret-key"
+
+# Admin account
+ADMIN_USERNAME = "Whot"
+ADMIN_PASSWORD = "Whot@2030"
+
+BASE_DIR = Path(__file__).resolve().parent
+DB_PATH = BASE_DIR / "whot_arena.db"
+
+
+def get_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def init_db():
+    conn = get_db()
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            phone TEXT NOT NULL UNIQUE,
+            password_hash TEXT NOT NULL,
+            balance INTEGER NOT NULL DEFAULT 0,
+            referral_code TEXT UNIQUE,
+            referred_by TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS referrals (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            referrer_id INTEGER NOT NULL,
+            referred_id INTEGER NOT NULL UNIQUE,
+            referral_code TEXT NOT NULL,
+            qualified INTEGER NOT NULL DEFAULT 0,
+            reward_paid INTEGER NOT NULL DEFAULT 0,
+            reward_amount INTEGER NOT NULL DEFAULT 25,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            qualified_at TIMESTAMP,
+            reward_paid_at TIMESTAMP,
+            FOREIGN KEY(referrer_id) REFERENCES users(id),
+            FOREIGN KEY(referred_id) REFERENCES users(id)
+        )
+    """)
+
+    # Upgrade an existing database created before referrals were added
+    columns = [row["name"] for row in conn.execute("PRAGMA table_info(users)").fetchall()]
+
+    if "referral_code" not in columns:
+        conn.execute("ALTER TABLE users ADD COLUMN referral_code TEXT")
+
+    if "referred_by" not in columns:
+        conn.execute("ALTER TABLE users ADD COLUMN referred_by TEXT")
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS withdrawals (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            bank_name TEXT NOT NULL,
+            account_name TEXT NOT NULL,
+            account_number TEXT NOT NULL,
+            amount INTEGER NOT NULL,
+            status TEXT NOT NULL DEFAULT 'pending',
+            rejection_reason TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )
+    """)
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS game_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            game_id TEXT NOT NULL UNIQUE,
+            stake INTEGER NOT NULL,
+            outcome TEXT NOT NULL DEFAULT 'active',
+            winnings INTEGER NOT NULL DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            completed_at TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )
+    """)
+
+
+    # --- 16 PLAYER TOURNAMENT UPGRADE ---
+    try:
+        existing_cols = {
+            row[1] for row in conn.execute("PRAGMA table_info(tournaments)").fetchall()
+        }
+
+        extra_columns = {
+            "prize_first": "INTEGER NOT NULL DEFAULT 1500",
+            "prize_second": "INTEGER NOT NULL DEFAULT 800",
+            "prize_third": "INTEGER NOT NULL DEFAULT 500",
+            "arena_fee": "INTEGER NOT NULL DEFAULT 400",
+            "current_round": "INTEGER NOT NULL DEFAULT 0",
+            "round_deadline": "TIMESTAMP",
+        }
+
+        for col, definition in extra_columns.items():
+            if col not in existing_cols:
+                conn.execute(
+                    f"ALTER TABLE tournaments ADD COLUMN {col} {definition}"
+                )
+
+        # Existing match table gets server-side timer fields.
+        match_cols = {
+            row[1]
+            for row in conn.execute(
+                "PRAGMA table_info(tournament_matches)"
+            ).fetchall()
+        }
+
+        match_extra = {
+            "turn_player_id": "INTEGER",
+            "turn_deadline": "TIMESTAMP",
+            "round_started_at": "TIMESTAMP",
+        }
+
+        for col, definition in match_extra.items():
+            if col not in match_cols:
+                conn.execute(
+                    f"ALTER TABLE tournament_matches ADD COLUMN {col} {definition}"
+                )
+
+        conn.commit()
+    except Exception:
+        conn.rollback()
+
+    conn.commit()
+    conn.close()
+
+
+@app.route("/")
+def home():
+    return render_template("welcome.html")
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        phone = request.form.get("phone", "").strip()
+        password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
+        referral_code_input = request.form.get("referral_code", "").strip().upper()
+
+        if not username or not phone or not password:
+            flash("Please fill in all fields.", "error")
+            return render_template(
+                "register.html",
+                referral_code=referral_code_input
+            )
+
+        if len(username) < 2:
+            flash("Username must be at least 2 characters.", "error")
+            return render_template(
+                "register.html",
+                referral_code=referral_code_input
+            )
+
+        if len(phone) < 10:
+            flash("Enter a valid phone number.", "error")
+            return render_template(
+                "register.html",
+                referral_code=referral_code_input
+            )
+
+        if len(password) < 6:
+            flash("Password must be at least 6 characters.", "error")
+            return render_template(
+                "register.html",
+                referral_code=referral_code_input
+            )
+
+        if password != confirm_password:
+            flash("Passwords do not match.", "error")
+            return render_template(
+                "register.html",
+                referral_code=referral_code_input
+            )
+
+        conn = get_db()
+
+        existing = conn.execute(
+            "SELECT id FROM users WHERE phone = ?",
+            (phone,)
+        ).fetchone()
+
+        if existing:
+            conn.close()
+            flash(
+                "ACCOUNT ALREADY EXISTS — This phone number is already registered. Please log in instead.",
+                "account_exists"
+            )
+            return render_template(
+                "register.html",
+                referral_code=referral_code_input
+            )
+
+        # Validate referral code if supplied
+        referrer = None
+
+        if referral_code_input:
+            referrer = conn.execute(
+                "SELECT id, username, referral_code FROM users WHERE referral_code = ?",
+                (referral_code_input,)
+            ).fetchone()
+
+            if not referrer:
+                conn.close()
+                flash("Invalid referral code.", "error")
+                return render_template(
+                    "register.html",
+                    referral_code=referral_code_input
+                )
+
+        password_hash = generate_password_hash(password)
+
+        referral_code = "WA" + secrets.token_hex(4).upper()
+
+        while conn.execute(
+            "SELECT id FROM users WHERE referral_code = ?",
+            (referral_code,)
+        ).fetchone():
+            referral_code = "WA" + secrets.token_hex(4).upper()
+
+        cursor = conn.execute(
+            """
+            INSERT INTO users
+            (username, phone, password_hash, balance, referral_code, referred_by)
+            VALUES (?, ?, ?, 75, ?, ?)
+            """,
+            (
+                username,
+                phone,
+                password_hash,
+                referral_code,
+                referral_code_input or None
+            )
+        )
+
+        new_user_id = cursor.lastrowid
+
+        # Create referral record, but do NOT pay the ₦25 yet.
+        if referrer and referrer["id"] != new_user_id:
+            conn.execute(
+                """
+                INSERT INTO referrals
+                (referrer_id, referred_id, referral_code)
+                VALUES (?, ?, ?)
+                """,
+                (
+                    referrer["id"],
+                    new_user_id,
+                    referral_code_input
+                )
+            )
+
+        conn.commit()
+        conn.close()
+
+        flash("Account created successfully. You can now log in.", "success")
+        return redirect(url_for("login"))
+
+    # Automatically carry ?ref=CODE into the registration form
+    referral_code = request.args.get("ref", "").strip().upper()
+
+    return render_template(
+        "register.html",
+        referral_code=referral_code
+    )
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        phone = request.form.get("phone", "").strip()
+        password = request.form.get("password", "")
+
+        conn = get_db()
+
+        user = conn.execute(
+            "SELECT * FROM users WHERE phone = ?",
+            (phone,)
+        ).fetchone()
+
+        conn.close()
+
+        if not user or not check_password_hash(user["password_hash"], password):
+            flash("Incorrect phone number or password.", "error")
+            return render_template("login.html")
+
+        session.clear()
+        session["user_id"] = user["id"]
+
+        return redirect(url_for("dashboard"))
+
+    return render_template("login.html")
+
+
+@app.route("/referral")
+def referral():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    conn = get_db()
+
+    user = conn.execute(
+        """
+        SELECT id, username, referral_code
+        FROM users
+        WHERE id = ?
+        """,
+        (session["user_id"],)
+    ).fetchone()
+
+    if not user:
+        conn.close()
+        session.clear()
+        return redirect(url_for("login"))
+
+    referral_count = conn.execute(
+        """
+        SELECT COUNT(*)
+        FROM referrals
+        WHERE referrer_id = ?
+        """,
+        (user["id"],)
+    ).fetchone()[0]
+
+    qualified_referrals = conn.execute(
+        """
+        SELECT COUNT(*)
+        FROM referrals
+        WHERE referrer_id = ?
+        AND qualified = 1
+        """,
+        (user["id"],)
+    ).fetchone()[0]
+
+    referral_earnings = conn.execute(
+        """
+        SELECT COALESCE(SUM(reward_amount), 0)
+        FROM referrals
+        WHERE referrer_id = ?
+        AND reward_paid = 1
+        """,
+        (user["id"],)
+    ).fetchone()[0]
+
+    conn.close()
+
+    referral_link = url_for(
+        "register",
+        ref=user["referral_code"],
+        _external=True
+    )
+
+    return render_template(
+        "referral.html",
+        user=user,
+        referral_link=referral_link,
+        referral_count=referral_count,
+        qualified_referrals=qualified_referrals,
+        referral_earnings=referral_earnings
+    )
+
+
+@app.route("/dashboard")
+def dashboard():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    conn = get_db()
+
+    user = conn.execute(
+        "SELECT id, username, phone, balance, referral_code FROM users WHERE id = ?",
+        (session["user_id"],)
+    ).fetchone()
+
+    if not user:
+        conn.close()
+        session.clear()
+        return redirect(url_for("login"))
+
+    referral_count = conn.execute(
+        """
+        SELECT COUNT(*)
+        FROM referrals
+        WHERE referrer_id = ?
+        """,
+        (user["id"],)
+    ).fetchone()[0]
+
+    qualified_referrals = conn.execute(
+        """
+        SELECT COUNT(*)
+        FROM referrals
+        WHERE referrer_id = ?
+        AND qualified = 1
+        """,
+        (user["id"],)
+    ).fetchone()[0]
+
+    referral_earnings = conn.execute(
+        """
+        SELECT COALESCE(SUM(reward_amount), 0)
+        FROM referrals
+        WHERE referrer_id = ?
+        AND reward_paid = 1
+        """,
+        (user["id"],)
+    ).fetchone()[0]
+
+    deposit_total = conn.execute(
+        """
+        SELECT COALESCE(SUM(amount), 0)
+        FROM deposits
+        WHERE user_id = ?
+        AND status = 'approved'
+        """,
+        (user["id"],)
+    ).fetchone()[0]
+
+    withdrawal_total = conn.execute(
+        """
+        SELECT COALESCE(SUM(amount), 0)
+        FROM withdrawals
+        WHERE user_id = ?
+        AND status = 'approved'
+        """,
+        (user["id"],)
+    ).fetchone()[0]
+
+    entry_fees = conn.execute(
+        """
+        SELECT COALESCE(SUM(stake), 0)
+        FROM game_history
+        WHERE user_id = ?
+        """,
+        (user["id"],)
+    ).fetchone()[0]
+
+    losses = conn.execute(
+        """
+        SELECT COALESCE(SUM(stake), 0)
+        FROM game_history
+        WHERE user_id = ?
+        AND outcome = 'loss'
+        """,
+        (user["id"],)
+    ).fetchone()[0]
+
+    wins = conn.execute(
+        """
+        SELECT COALESCE(SUM(winnings), 0)
+        FROM game_history
+        WHERE user_id = ?
+        AND outcome = 'win'
+        """,
+        (user["id"],)
+    ).fetchone()[0]
+
+    conn.close()
+
+    return render_template(
+        "dashboard.html",
+        user=user,
+        referral_count=referral_count,
+        qualified_referrals=qualified_referrals,
+        referral_earnings=referral_earnings,
+        deposit_total=deposit_total,
+        withdrawal_total=withdrawal_total,
+        entry_fees=entry_fees,
+        losses=losses,
+        wins=wins
+    )
+
+
+@app.route("/tournament")
+def tournament():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    conn = get_db()
+    user = conn.execute(
+        "SELECT id, username, phone, balance FROM users WHERE id = ?",
+        (session["user_id"],)
+    ).fetchone()
+    conn.close()
+
+    if not user:
+        session.clear()
+        return redirect(url_for("login"))
+
+    return render_template("tournament.html", user=user)
+
+
+@app.route("/tournament/join", methods=["POST"])
+def join_tournament():
+    if "user_id" not in session:
+        return {"success": False, "message": "Please login first."}, 401
+
+    user_id = session["user_id"]
+    entry_fee = 200
+    max_players = 16
+
+    conn = get_db()
+
+    try:
+        conn.execute("BEGIN IMMEDIATE")
+
+        user = conn.execute(
+            "SELECT id, username, balance FROM users WHERE id = ?",
+            (user_id,)
+        ).fetchone()
+
+        if not user:
+            conn.rollback()
+            return {"success": False, "message": "Account not found."}, 404
+
+        tournament = conn.execute("""
+            SELECT id, entry_fee, max_players, status
+            FROM tournaments
+            WHERE status = 'open'
+            ORDER BY start_at ASC, id ASC
+            LIMIT 1
+        """).fetchone()
+
+        if not tournament:
+            conn.rollback()
+            return {
+                "success": False,
+                "message": "No tournament is currently open."
+            }, 400
+
+        entry_fee = int(tournament["entry_fee"])
+        max_players = 16
+
+        already_joined = conn.execute("""
+            SELECT id
+            FROM tournament_players
+            WHERE tournament_id = ?
+              AND user_id = ?
+        """, (tournament["id"], user_id)).fetchone()
+
+        if already_joined:
+            conn.rollback()
+            return {
+                "success": False,
+                "message": "You are already registered for this tournament."
+            }, 400
+
+        human_count = conn.execute("""
+            SELECT COUNT(*)
+            FROM tournament_players
+            WHERE tournament_id = ?
+              AND is_ai = 0
+        """, (tournament["id"],)).fetchone()[0]
+
+        if human_count >= max_players:
+            conn.rollback()
+            return {
+                "success": False,
+                "message": "This tournament is already full."
+            }, 400
+
+        updated = conn.execute("""
+            UPDATE users
+            SET balance = balance - ?
+            WHERE id = ?
+              AND balance >= ?
+        """, (entry_fee, user_id, entry_fee))
+
+        if updated.rowcount != 1:
+            conn.rollback()
+            return {
+                "success": False,
+                "message": "Insufficient balance. You need ₦200 to enter."
+            }, 400
+
+        used_slots = {
+            row[0]
+            for row in conn.execute("""
+                SELECT slot_number
+                FROM tournament_players
+                WHERE tournament_id = ?
+            """, (tournament["id"],)).fetchall()
+        }
+
+        slot_number = next(
+            slot for slot in range(1, max_players + 1)
+            if slot not in used_slots
+        )
+
+        conn.execute("""
+            INSERT INTO tournament_players
+                (tournament_id, user_id, username, is_ai, slot_number, status)
+            VALUES (?, ?, ?, 0, ?, 'active')
+        """, (
+            tournament["id"],
+            user["id"],
+            user["username"],
+            slot_number
+        ))
+
+        conn.commit()
+
+        return {
+            "success": True,
+            "message": "Tournament joined successfully.",
+            "tournament_id": tournament["id"],
+            "slot_number": slot_number,
+            "entry_fee": entry_fee
+        }
+
+    except Exception as e:
+        conn.rollback()
+        return {
+            "success": False,
+            "message": "Unable to join tournament."
+        }, 500
+
+    finally:
+        conn.close()
+
+
+@app.route("/normal-game")
+def normal_game():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    try:
+        stake = int(request.args.get("stake", "30"))
+    except ValueError:
+        stake = 30
+
+    allowed_stakes = {30, 50, 100, 200, 500, 1000}
+    if stake not in allowed_stakes:
+        stake = 30
+
+    conn = get_db()
+    user = conn.execute(
+        "SELECT id, username, phone, balance FROM users WHERE id = ?",
+        (session["user_id"],)
+    ).fetchone()
+    conn.close()
+
+    if not user:
+        session.clear()
+        return redirect(url_for("login"))
+
+    if user["balance"] < stake:
+        return f"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Insufficient Balance - WHOT Arena</title>
+            <style>
+                * {{
+                    box-sizing: border-box;
+                }}
+
+                body {{
+                    margin: 0;
+                    min-height: 100vh;
+                    font-family: Arial, Helvetica, sans-serif;
+                    background:
+                        radial-gradient(circle at 20% 10%, #173b9b 0, transparent 30%),
+                        radial-gradient(circle at 90% 80%, #0b5bd3 0, transparent 28%),
+                        linear-gradient(145deg, #020b2d, #061957 55%, #020a28);
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 22px 14px;
+                    overflow-x: hidden;
+                }}
+
+                .page {{
+                    width: 100%;
+                    max-width: 520px;
+                    text-align: center;
+                }}
+
+                .brand {{
+                    margin-bottom: 18px;
+                }}
+
+                .logo {{
+                    display: inline-block;
+                    font-size: 32px;
+                    font-weight: 1000;
+                    letter-spacing: 1px;
+                    color: #ffd21c;
+                    text-shadow: 0 3px 18px rgba(255,210,28,.35);
+                }}
+
+                .arena {{
+                    display: block;
+                    color: #fff;
+                    font-size: 17px;
+                    font-weight: 900;
+                    letter-spacing: 6px;
+                    margin-top: -2px;
+                }}
+
+                .tagline {{
+                    color: #8fc9ff;
+                    font-size: 11px;
+                    letter-spacing: 3px;
+                    margin-top: 8px;
+                }}
+
+                .card {{
+                    background: rgba(5, 20, 70, .94);
+                    border: 1px solid #126bff;
+                    border-radius: 28px;
+                    padding: 30px 20px 24px;
+                    box-shadow:
+                        0 0 35px rgba(0, 102, 255, .28),
+                        inset 0 0 30px rgba(0, 72, 180, .12);
+                }}
+
+                .wallet {{
+                    width: 92px;
+                    height: 92px;
+                    margin: 0 auto 20px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 43px;
+                    background: linear-gradient(145deg, #087cff, #0638b5);
+                    border: 4px solid #1fa9ff;
+                    box-shadow: 0 0 30px rgba(0, 157, 255, .5);
+                    position: relative;
+                }}
+
+                .alert {{
+                    position: absolute;
+                    right: -3px;
+                    bottom: -4px;
+                    width: 31px;
+                    height: 31px;
+                    border-radius: 50%;
+                    background: #ff3b3b;
+                    color: white;
+                    border: 3px solid #07194f;
+                    font-size: 19px;
+                    font-weight: 900;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }}
+
+                h1 {{
+                    margin: 0;
+                    font-size: 34px;
+                    line-height: 1.05;
+                    font-weight: 1000;
+                }}
+
+                h1 span {{
+                    color: #ffd21c;
+                }}
+
+                .description {{
+                    color: #d6e5ff;
+                    line-height: 1.6;
+                    font-size: 15px;
+                    margin: 16px auto 24px;
+                    max-width: 390px;
+                }}
+
+                .amounts {{
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    border: 1px solid #145ed8;
+                    border-radius: 18px;
+                    margin-bottom: 24px;
+                    overflow: hidden;
+                    background: rgba(3, 18, 67, .8);
+                }}
+
+                .amount {{
+                    padding: 17px 10px;
+                }}
+
+                .amount + .amount {{
+                    border-left: 1px solid #145ed8;
+                }}
+
+                .label {{
+                    color: #a8c7f7;
+                    font-size: 12px;
+                    margin-bottom: 7px;
+                }}
+
+                .value {{
+                    color: #ffd21c;
+                    font-size: 23px;
+                    font-weight: 1000;
+                }}
+
+                .button {{
+                    display: block;
+                    width: 100%;
+                    padding: 17px 20px;
+                    border-radius: 16px;
+                    text-decoration: none;
+                    font-weight: 900;
+                    font-size: 16px;
+                    margin-top: 12px;
+                    transition: transform .15s ease;
+                }}
+
+                .button:active {{
+                    transform: scale(.98);
+                }}
+
+                .primary {{
+                    background: linear-gradient(135deg, #ffd21c, #ffad00);
+                    color: #06143f;
+                    box-shadow: 0 8px 22px rgba(255, 193, 7, .22);
+                }}
+
+                .secondary {{
+                    background: transparent;
+                    color: #dceaff;
+                    border: 1px solid #1593ff;
+                }}
+
+                .footer {{
+                    margin-top: 22px;
+                    color: #8fb2e8;
+                    font-size: 12px;
+                    line-height: 1.8;
+                }}
+
+                .secure {{
+                    color: #70e69a;
+                    font-weight: 700;
+                }}
+
+                @media (max-width: 380px) {{
+                    h1 {{
+                        font-size: 29px;
+                    }}
+
+                    .card {{
+                        padding: 25px 15px 20px;
+                    }}
+                }}
+            </style>
+        </head>
+
+        <body>
+            <main class="page">
+                <div class="brand">
+                    <div class="logo">WHOT</div>
+                    <div class="arena">ARENA</div>
+                    <div class="tagline">PLAY • WIN • EARN</div>
+                </div>
+
+                <section class="card">
+                    <div class="wallet">
+                        💰
+                        <div class="alert">!</div>
+                    </div>
+
+                    <h1>Insufficient <span>Balance</span></h1>
+
+                    <p class="description">
+                        Your current balance is <strong>₦{user["balance"]:,}</strong>,
+                        but this game requires <strong>₦{stake:,}</strong> to enter.
+                    </p>
+
+                    <div class="amounts">
+                        <div class="amount">
+                            <div class="label">YOUR BALANCE</div>
+                            <div class="value">₦{user["balance"]:,}</div>
+                        </div>
+
+                        <div class="amount">
+                            <div class="label">GAME ENTRY</div>
+                            <div class="value">₦{stake:,}</div>
+                        </div>
+                    </div>
+
+                    <a class="button primary" href="/dashboard">
+                        🏠 &nbsp; Return to Dashboard
+                    </a>
+
+                    <a class="button secondary" href="/dashboard">
+                        💳 &nbsp; Go to Wallet
+                    </a>
+
+                    <div class="footer">
+                        <div class="secure">🛡 Secure • Fast • Trusted</div>
+                        <div>Play More • Win More • Grow Your Account</div>
+                        <div>© WHOT Arena</div>
+                    </div>
+                </section>
+            </main>
+        </body>
+        </html>
+        """
+
+
+    # Create a unique game session.
+    # Refreshing the same game will NOT deduct the stake again.
+    game_id = session.get("game_id")
+    game_stake = session.get("current_stake")
+
+    if not game_id or game_stake != stake or not session.get("game_active"):
+        game_id = secrets.token_urlsafe(16)
+
+        conn = get_db()
+        updated = conn.execute(
+            "UPDATE users SET balance = balance - ? WHERE id = ? AND balance >= ?",
+            (stake, session["user_id"], stake)
+        )
+        conn.commit()
+        conn.close()
+
+        if updated.rowcount != 1:
+            return "Unable to start game: insufficient balance."
+
+        session["game_id"] = game_id
+        session["current_stake"] = stake
+        session["game_active"] = True
+        session["game_payout_claimed"] = False
+
+        conn = get_db()
+        conn.execute(
+            """
+            INSERT INTO game_history
+                (user_id, game_id, stake, outcome, winnings)
+            VALUES (?, ?, ?, 'active', 0)
+            """,
+            (session["user_id"], game_id, stake)
+        )
+        conn.commit()
+        conn.close()
+
+    return render_template("normal_game.html", user=user, stake=stake)
+
+
+@app.route("/game-win")
+def game_win():
+    if "user_id" not in session:
+        return {"success": False, "message": "Not logged in"}, 401
+
+    if not session.get("game_active"):
+        return {"success": False, "message": "No active game"}
+
+    stake = session.get("current_stake")
+
+    if not stake:
+        return {"success": False, "message": "Game stake not found"}, 400
+
+    if session.get("game_payout_claimed"):
+        return {"success": False, "message": "Payout already claimed"}
+
+    payout_table = {
+        30: 50,
+        50: 85,
+        100: 180,
+        200: 350,
+        500: 850,
+        1000: 1850
+    }
+
+    winnings = payout_table.get(stake, 0)
+
+    if winnings <= 0:
+        return {"success": False, "message": "Invalid stake"}, 400
+
+    conn = get_db()
+
+    updated = conn.execute(
+        "UPDATE users SET balance = balance + ? WHERE id = ?",
+        (winnings, session["user_id"])
+    )
+
+    if updated.rowcount == 1:
+        conn.execute(
+            """
+            UPDATE game_history
+            SET outcome = 'win',
+                winnings = ?,
+                completed_at = CURRENT_TIMESTAMP
+            WHERE game_id = ?
+              AND user_id = ?
+              AND outcome = 'active'
+            """,
+            (winnings, session.get("game_id"), session["user_id"])
+        )
+
+    conn.commit()
+    conn.close()
+
+    if updated.rowcount != 1:
+        return {"success": False, "message": "Payout failed"}, 500
+
+    session["game_payout_claimed"] = True
+    session["game_active"] = False
+
+    return {
+        "success": True,
+        "winnings": winnings
+    }
+
+
+@app.route("/game-exit")
+def game_exit():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    # Exiting an active AI game forfeits the already-deducted stake.
+    if session.get("game_active"):
+        conn = get_db()
+        conn.execute(
+            """
+            UPDATE game_history
+            SET outcome = 'loss',
+                winnings = 0,
+                completed_at = CURRENT_TIMESTAMP
+            WHERE game_id = ?
+              AND user_id = ?
+              AND outcome = 'active'
+            """,
+            (session.get("game_id"), session["user_id"])
+        )
+        conn.commit()
+        conn.close()
+
+        session["game_active"] = False
+        session["game_payout_claimed"] = True
+
+    return redirect(url_for("dashboard"))
+
+
+@app.route("/deposit", methods=["POST"])
+def deposit():
+    if "user_id" not in session:
+        return {"success": False, "message": "Please login first."}, 401
+
+    try:
+        amount = int(request.form.get("amount", "0"))
+    except ValueError:
+        amount = 0
+
+    sender_name = request.form.get("sender_name", "").strip()
+
+    if amount < 100:
+        return {"success": False, "message": "Minimum deposit is ₦100."}, 400
+
+    if not sender_name:
+        return {"success": False, "message": "Sender name is required."}, 400
+
+    conn = get_db()
+    conn.execute(
+        """
+        INSERT INTO deposits (user_id, amount, sender_name, status)
+        VALUES (?, ?, ?, 'pending')
+        """,
+        (session["user_id"], amount, sender_name)
+    )
+    conn.commit()
+    conn.close()
+
+    return {
+        "success": True,
+        "message": "Deposit submitted successfully and is awaiting verification."
+    }
+
+
+@app.route("/admin/deposit/<int:deposit_id>/approve", methods=["POST"])
+def approve_deposit(deposit_id):
+    if session.get("admin_logged_in") != True:
+        return redirect(url_for("admin_login"))
+
+    conn = get_db()
+
+    deposit = conn.execute(
+        "SELECT id, user_id, amount, status FROM deposits WHERE id = ?",
+        (deposit_id,)
+    ).fetchone()
+
+    if not deposit:
+        conn.close()
+        return "Deposit not found.", 404
+
+    if deposit["status"] != "pending":
+        conn.close()
+        return redirect(url_for("admin_dashboard"))
+
+    updated = conn.execute(
+        """
+        UPDATE deposits
+        SET status = 'approved',
+            reviewed_at = CURRENT_TIMESTAMP
+        WHERE id = ? AND status = 'pending'
+        """,
+        (deposit_id,)
+    )
+
+    if updated.rowcount == 1:
+        conn.execute(
+            "UPDATE users SET balance = balance + ? WHERE id = ?",
+            (deposit["amount"], deposit["user_id"])
+        )
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("admin_dashboard"))
+
+
+@app.route("/admin/deposit/<int:deposit_id>/reject", methods=["POST"])
+def reject_deposit(deposit_id):
+    if session.get("admin_logged_in") != True:
+        return redirect(url_for("admin_login"))
+
+    reason = request.form.get("reason", "").strip()
+
+    if not reason:
+        reason = "Deposit rejected by administrator."
+
+    conn = get_db()
+
+    conn.execute(
+        """
+        UPDATE deposits
+        SET status = 'rejected',
+            rejection_reason = ?,
+            reviewed_at = CURRENT_TIMESTAMP
+        WHERE id = ? AND status = 'pending'
+        """,
+        (reason, deposit_id)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("admin_dashboard"))
+
+@app.route("/withdraw", methods=["POST"])
+def withdraw():
+    if "user_id" not in session:
+        return {"success": False, "message": "Please login first."}, 401
+
+    bank_name = request.form.get("bank_name", "").strip()
+    account_name = request.form.get("account_name", "").strip()
+    account_number = request.form.get("account_number", "").strip()
+
+    try:
+        amount = int(request.form.get("amount", "0"))
+    except ValueError:
+        amount = 0
+
+    if not bank_name:
+        return {"success": False, "message": "Bank name is required."}, 400
+
+    if not account_name:
+        return {"success": False, "message": "Account name is required."}, 400
+
+    if len(account_number) != 10 or not account_number.isdigit():
+        return {"success": False, "message": "Please enter a valid 10-digit account number."}, 400
+
+    if amount < 200:
+        return {"success": False, "message": "Minimum withdrawal is ₦200."}, 400
+
+    conn = get_db()
+
+    user = conn.execute(
+        "SELECT balance FROM users WHERE id = ?",
+        (session["user_id"],)
+    ).fetchone()
+
+    if not user:
+        conn.close()
+        return {"success": False, "message": "User account not found."}, 404
+
+    if user["balance"] < amount:
+        conn.close()
+        return {"success": False, "message": "Insufficient balance."}, 400
+
+    # Reserve the requested amount immediately.
+    conn.execute(
+        "UPDATE users SET balance = balance - ? WHERE id = ?",
+        (amount, session["user_id"])
+    )
+
+    conn.execute(
+        """
+        INSERT INTO withdrawals
+        (user_id, bank_name, account_name, account_number, amount, status)
+        VALUES (?, ?, ?, ?, ?, 'pending')
+        """,
+        (
+            session["user_id"],
+            bank_name,
+            account_name,
+            account_number,
+            amount
+        )
+    )
+
+    conn.commit()
+    conn.close()
+
+    return {
+        "success": True,
+        "message": "Withdrawal submitted successfully and is awaiting admin approval."
+    }
+
+
+@app.route("/admin/withdraw/<int:withdrawal_id>/approve", methods=["POST"])
+def admin_approve_withdrawal(withdrawal_id):
+    if session.get("admin_logged_in") != True:
+        return redirect(url_for("admin_login"))
+
+    conn = get_db()
+
+    withdrawal = conn.execute(
+        "SELECT id, user_id, amount, status FROM withdrawals WHERE id = ?",
+        (withdrawal_id,)
+    ).fetchone()
+
+    if withdrawal and withdrawal["status"] == "pending":
+        conn.execute(
+            """
+            UPDATE withdrawals
+            SET status = 'approved'
+            WHERE id = ? AND status = 'pending'
+            """,
+            (withdrawal_id,)
+        )
+        conn.commit()
+
+    conn.close()
+    return redirect(url_for("admin_dashboard"))
+
+
+@app.route("/admin/withdraw/<int:withdrawal_id>/reject", methods=["POST"])
+def admin_reject_withdrawal(withdrawal_id):
+    if session.get("admin_logged_in") != True:
+        return redirect(url_for("admin_login"))
+
+    reason = request.form.get("reason", "Withdrawal rejected by admin.").strip()
+
+    conn = get_db()
+
+    withdrawal = conn.execute(
+        """
+        SELECT id, user_id, amount, status
+        FROM withdrawals
+        WHERE id = ?
+        """,
+        (withdrawal_id,)
+    ).fetchone()
+
+    if withdrawal and withdrawal["status"] == "pending":
+        conn.execute(
+            """
+            UPDATE users
+            SET balance = balance + ?
+            WHERE id = ?
+            """,
+            (withdrawal["amount"], withdrawal["user_id"])
+        )
+
+        conn.execute(
+            """
+            UPDATE withdrawals
+            SET status = 'rejected',
+                rejection_reason = ?
+            WHERE id = ? AND status = 'pending'
+            """,
+            (reason, withdrawal_id)
+        )
+
+        conn.commit()
+
+    conn.close()
+    return redirect(url_for("admin_dashboard"))
+
+
+
+@app.route("/whatsapp")
+def whatsapp_group():
+    return redirect("https://chat.whatsapp.com/F0AmqD0RlYC5EqsMpeGvRz")
+
+@app.route("/admin")
+def admin_dashboard():
+    if session.get("admin_logged_in") != True:
+        return redirect(url_for("admin_login"))
+
+    conn = get_db()
+
+    total_users = conn.execute(
+        "SELECT COUNT(*) FROM users"
+    ).fetchone()[0]
+
+    total_deposits = conn.execute(
+        "SELECT COALESCE(SUM(amount), 0) FROM deposits WHERE status = 'approved'"
+    ).fetchone()[0]
+
+    total_withdrawals = conn.execute(
+        "SELECT COALESCE(SUM(amount), 0) FROM withdrawals WHERE status = 'approved'"
+    ).fetchone()[0]
+
+    deposits = conn.execute("""
+        SELECT deposits.id, deposits.amount, deposits.sender_name,
+               deposits.status, deposits.rejection_reason,
+               deposits.created_at, users.username
+        FROM deposits
+        JOIN users ON users.id = deposits.user_id
+        ORDER BY deposits.id DESC
+        LIMIT 50
+    """).fetchall()
+
+    withdrawals = conn.execute("""
+        SELECT withdrawals.id, withdrawals.amount, withdrawals.status,
+               withdrawals.bank_name, withdrawals.account_name,
+               withdrawals.account_number, withdrawals.rejection_reason,
+               withdrawals.created_at, users.username
+        FROM withdrawals
+        JOIN users ON users.id = withdrawals.user_id
+        ORDER BY withdrawals.id DESC
+        LIMIT 50
+    """).fetchall()
+
+    conn.close()
+
+    return render_template(
+        "admin/dashboard.html",
+        total_users=total_users,
+        total_deposits=total_deposits,
+        total_withdrawals=total_withdrawals,
+        deposits=deposits,
+        withdrawals=withdrawals
+    )
+
+
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    if request.method == "POST":
+        username = request.form.get("username", "")
+        password = request.form.get("password", "")
+
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+            session["admin_logged_in"] = True
+            return redirect(url_for("admin_dashboard"))
+
+        return render_template(
+            "admin/login.html",
+            error="Invalid admin username or password."
+        )
+
+    return render_template("admin/login.html")
+
+
+@app.route("/admin/logout")
+def admin_logout():
+    session.pop("admin_logged_in", None)
+    return redirect(url_for("admin_login"))
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("home"))
+
+
+
+def create_next_tournament():
+    from datetime import datetime, timedelta
+    from zoneinfo import ZoneInfo
+
+    nigeria = ZoneInfo("Africa/Lagos")
+    now = datetime.now(nigeria).replace(tzinfo=None)
+
+    conn = get_db()
+
+    existing = conn.execute("""
+        SELECT id
+        FROM tournaments
+        WHERE status = 'open'
+        ORDER BY start_at ASC, id ASC
+        LIMIT 1
+    """).fetchone()
+
+    if existing:
+        conn.close()
+        return
+
+    latest = conn.execute("""
+        SELECT start_at
+        FROM tournaments
+        ORDER BY start_at DESC
+        LIMIT 1
+    """).fetchone()
+
+    if latest:
+        try:
+            latest_start = datetime.fromisoformat(latest["start_at"])
+            start_at = latest_start + timedelta(hours=2)
+            if start_at <= now:
+                start_at = now + timedelta(hours=2)
+        except Exception:
+            start_at = now + timedelta(hours=2)
+    else:
+        start_at = now + timedelta(hours=2)
+
+    conn.execute("""
+        INSERT INTO tournaments
+        (
+            entry_fee,
+            prize,
+            max_players,
+            min_humans,
+            status,
+            start_at,
+            prize_first,
+            prize_second,
+            prize_third,
+            arena_fee,
+            current_round
+        )
+        VALUES
+        (
+            200,
+            1500,
+            16,
+            4,
+            'open',
+            ?,
+            1500,
+            800,
+            500,
+            400,
+            0
+        )
+    """, (start_at.isoformat(sep=" "),))
+
+    conn.commit()
+    conn.close()
+
+
+def start_due_tournament():
+    from datetime import datetime, timedelta
+
+    conn = get_db()
+
+    tournament = conn.execute("""
+        SELECT
+            id,
+            entry_fee,
+            max_players,
+            min_humans,
+            start_at,
+            prize_first,
+            prize_second,
+            prize_third,
+            arena_fee
+        FROM tournaments
+        WHERE status = 'open'
+        ORDER BY start_at ASC, id ASC
+        LIMIT 1
+    """).fetchone()
+
+    if not tournament:
+        conn.close()
+        return
+
+    try:
+        start_at = datetime.fromisoformat(tournament["start_at"])
+    except Exception:
+        conn.close()
+        return
+
+    now = datetime.now()
+
+    if start_at > now:
+        conn.close()
+        return
+
+    tournament_id = tournament["id"]
+
+    humans = conn.execute("""
+        SELECT id, user_id, username, slot_number
+        FROM tournament_players
+        WHERE tournament_id = ?
+          AND is_ai = 0
+        ORDER BY slot_number ASC
+    """, (tournament_id,)).fetchall()
+
+    human_count = len(humans)
+    min_humans = int(tournament["min_humans"])
+    max_players = 16
+
+    # Not enough real players: refund and cancel.
+    if human_count < min_humans:
+        for player in humans:
+            conn.execute("""
+                UPDATE users
+                SET balance = balance + ?
+                WHERE id = ?
+            """, (tournament["entry_fee"], player["user_id"]))
+
+        conn.execute("""
+            UPDATE tournaments
+            SET status = 'cancelled',
+                completed_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        """, (tournament_id,))
+
+        conn.commit()
+        conn.close()
+        return
+
+    existing_ai = conn.execute("""
+        SELECT COUNT(*)
+        FROM tournament_players
+        WHERE tournament_id = ?
+          AND is_ai = 1
+    """, (tournament_id,)).fetchone()[0]
+
+    ai_needed = max_players - human_count - existing_ai
+
+    ai_names = [f"Arena AI {i}" for i in range(1, 17)]
+
+    used_slots = {
+        row[0]
+        for row in conn.execute("""
+            SELECT slot_number
+            FROM tournament_players
+            WHERE tournament_id = ?
+        """, (tournament_id,)).fetchall()
+    }
+
+    used_ai_names = {
+        row[0]
+        for row in conn.execute("""
+            SELECT username
+            FROM tournament_players
+            WHERE tournament_id = ?
+              AND is_ai = 1
+        """, (tournament_id,)).fetchall()
+    }
+
+    for name in ai_names:
+        if ai_needed <= 0:
+            break
+
+        if name in used_ai_names:
+            continue
+
+        free_slots = [
+            slot for slot in range(1, max_players + 1)
+            if slot not in used_slots
+        ]
+
+        if not free_slots:
+            break
+
+        slot = free_slots[0]
+
+        conn.execute("""
+            INSERT INTO tournament_players
+                (
+                    tournament_id,
+                    user_id,
+                    username,
+                    is_ai,
+                    slot_number,
+                    status
+                )
+            VALUES (?, NULL, ?, 1, ?, 'active')
+        """, (tournament_id, name, slot))
+
+        used_slots.add(slot)
+        ai_needed -= 1
+
+    # ---------------------------------------------
+    # Build Round of 16
+    # ---------------------------------------------
+    players = conn.execute("""
+        SELECT id
+        FROM tournament_players
+        WHERE tournament_id = ?
+        ORDER BY slot_number ASC
+        LIMIT 16
+    """, (tournament_id,)).fetchall()
+
+    if len(players) != 16:
+        conn.close()
+        return
+
+    existing_matches = conn.execute("""
+        SELECT COUNT(*)
+        FROM tournament_matches
+        WHERE tournament_id = ?
+    """, (tournament_id,)).fetchone()[0]
+
+    if existing_matches == 0:
+        for i in range(8):
+            p1 = players[i * 2]["id"]
+            p2 = players[i * 2 + 1]["id"]
+
+            conn.execute("""
+                INSERT INTO tournament_matches
+                (
+                    tournament_id,
+                    round_number,
+                    match_number,
+                    player1_id,
+                    player2_id,
+                    status,
+                    turn_player_id,
+                    turn_deadline,
+                    round_started_at
+                )
+                VALUES (?, 1, ?, ?, ?, 'active', ?, datetime('now', '+20 seconds'), CURRENT_TIMESTAMP)
+            """, (
+                tournament_id,
+                i + 1,
+                p1,
+                p2,
+                p1
+            ))
+
+    conn.execute("""
+        UPDATE tournaments
+        SET
+            status = 'running',
+            started_at = CURRENT_TIMESTAMP,
+            current_round = 1,
+            round_deadline = datetime('now', '+20 seconds')
+        WHERE id = ?
+          AND status = 'open'
+    """, (tournament_id,))
+
+    conn.commit()
+    conn.close()
+
+
+# -------------------------------------------------
+# SERVER-SIDE 20 SECOND TOURNAMENT TURN
+# -------------------------------------------------
+@app.route("/tournament/move", methods=["POST"])
+def tournament_move():
+    from datetime import datetime
+
+    if "user_id" not in session:
+        return {"success": False, "message": "Please login first."}, 401
+
+    user_id = session["user_id"]
+
+    try:
+        tournament_id = int(request.form.get("tournament_id", "0"))
+        match_id = int(request.form.get("match_id", "0"))
+    except ValueError:
+        return {"success": False, "message": "Invalid tournament match."}, 400
+
+    conn = get_db()
+
+    match = conn.execute("""
+        SELECT
+            tournament_matches.*,
+            p1.user_id AS p1_user_id,
+            p2.user_id AS p2_user_id
+        FROM tournament_matches
+        JOIN tournament_players p1
+          ON p1.id = tournament_matches.player1_id
+        JOIN tournament_players p2
+          ON p2.id = tournament_matches.player2_id
+        WHERE tournament_matches.id = ?
+          AND tournament_matches.tournament_id = ?
+          AND tournament_matches.status = 'active'
+    """, (match_id, tournament_id)).fetchone()
+
+    if not match:
+        conn.close()
+        return {"success": False, "message": "Match is not active."}, 400
+
+    allowed = user_id in (
+        match["p1_user_id"],
+        match["p2_user_id"]
+    )
+
+    if not allowed:
+        conn.close()
+        return {"success": False, "message": "You are not in this match."}, 403
+
+    # The database deadline is authoritative.
+    deadline = match["turn_deadline"]
+
+    if deadline:
+        try:
+            deadline_dt = datetime.fromisoformat(deadline)
+            if datetime.now() >= deadline_dt:
+                loser_player = match["turn_player_id"]
+
+                winner_player = (
+                    match["player2_id"]
+                    if loser_player == match["player1_id"]
+                    else match["player1_id"]
+                )
+
+                conn.execute("""
+                    UPDATE tournament_matches
+                    SET
+                        winner_id = ?,
+                        status = 'completed',
+                        completed_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                      AND status = 'active'
+                """, (winner_player, match_id))
+
+                conn.execute("""
+                    UPDATE tournament_players
+                    SET status = 'eliminated'
+                    WHERE id = ?
+                """, (loser_player,))
+
+                conn.commit()
+                conn.close()
+
+                return {
+                    "success": False,
+                    "timeout": True,
+                    "message": "20 seconds expired. The turn was forfeited."
+                }, 408
+        except Exception:
+            pass
+
+    # Reset the server deadline after a valid move.
+    conn.execute("""
+        UPDATE tournament_matches
+        SET
+            turn_player_id = CASE
+                WHEN turn_player_id = player1_id THEN player2_id
+                ELSE player1_id
+            END,
+            turn_deadline = datetime('now', '+20 seconds')
+        WHERE id = ?
+          AND status = 'active'
+    """, (match_id,))
+
+    conn.commit()
+    conn.close()
+
+    return {
+        "success": True,
+        "message": "Move accepted.",
+        "seconds": 20
+    }
+
+
+# -------------------------------------------------
+# TOURNAMENT BRACKET DATA
+# -------------------------------------------------
+@app.route("/tournament/bracket")
+def tournament_bracket():
+    conn = get_db()
+
+    tournament = conn.execute("""
+        SELECT *
+        FROM tournaments
+        ORDER BY id DESC
+        LIMIT 1
+    """).fetchone()
+
+    if not tournament:
+        conn.close()
+        return {"success": False, "message": "No tournament found."}, 404
+
+    matches = conn.execute("""
+        SELECT
+            m.id,
+            m.round_number,
+            m.match_number,
+            m.status,
+            m.turn_deadline,
+            m.winner_id,
+            p1.username AS player1,
+            p2.username AS player2
+        FROM tournament_matches m
+        LEFT JOIN tournament_players p1 ON p1.id = m.player1_id
+        LEFT JOIN tournament_players p2 ON p2.id = m.player2_id
+        WHERE m.tournament_id = ?
+        ORDER BY m.round_number, m.match_number
+    """, (tournament["id"],)).fetchall()
+
+    conn.close()
+
+    return {
+        "success": True,
+        "tournament": {
+            "id": tournament["id"],
+            "status": tournament["status"],
+            "start_at": tournament["start_at"],
+            "max_players": tournament["max_players"],
+            "entry_fee": tournament["entry_fee"],
+            "first": tournament["prize_first"],
+            "second": tournament["prize_second"],
+            "third": tournament["prize_third"],
+            "arena_fee": tournament["arena_fee"]
+        },
+        "matches": [dict(row) for row in matches]
+    }
+
+
+def tournament_scheduler():
+    import time
+
+    while True:
+        try:
+            create_next_tournament()
+            start_due_tournament()
+        except Exception:
+            pass
+
+        time.sleep(20)
+
+
+def start_tournament_scheduler():
+    import threading
+    import os
+
+    if os.environ.get("WERKZEUG_RUN_MAIN") not in (None, "true"):
+        return
+
+    if getattr(app, "_tournament_scheduler_started", False):
+        return
+
+    app._tournament_scheduler_started = True
+
+    thread = threading.Thread(
+        target=tournament_scheduler,
+        daemon=True
+    )
+    thread.start()
+
+
+init_db()
+start_tournament_scheduler()
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)

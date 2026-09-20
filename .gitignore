@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.env
+whot_arena.db
+*.db
+app.py.before_postgres

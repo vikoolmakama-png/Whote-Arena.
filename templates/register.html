@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Account - WHOT Arena</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: #031326;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 25px 18px;
+}
+
+.container {
+    width: 100%;
+    max-width: 430px;
+}
+
+.brand {
+    text-align: center;
+    color: #56a9ff;
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    margin-bottom: 28px;
+}
+
+.card {
+    background: linear-gradient(145deg, #0b2948, #061a30);
+    border: 1px solid #245b8f;
+    border-radius: 24px;
+    padding: 28px 22px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.35);
+}
+
+h1 {
+    text-align: center;
+    margin: 0 0 8px;
+    font-size: 28px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #91a8bf;
+    margin: 0 0 25px;
+}
+
+label {
+    display: block;
+    margin: 15px 0 8px;
+    color: #dce9f7;
+    font-weight: 700;
+}
+
+input {
+    width: 100%;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid #315f89;
+    background: #06172a;
+    color: white;
+    font-size: 16px;
+    outline: none;
+}
+
+input:focus {
+    border-color: #49a4ff;
+}
+
+button {
+    width: 100%;
+    margin-top: 24px;
+    padding: 16px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #2d9bf0, #126bc1);
+    color: white;
+    font-size: 17px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.message {
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    text-align: center;
+    background: #381b25;
+    color: #ffb5c2;
+}
+
+.success {
+    background: #123521;
+    color: #9df0b8;
+}
+
+.bottom {
+    text-align: center;
+    margin-top: 22px;
+    color: #91a8bf;
+}
+
+.bottom a {
+    color: #58adff;
+    text-decoration: none;
+    font-weight: 800;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="brand">WHOT ARENA</div>
+
+    <div class="card">
+
+        <h1>Create Account</h1>
+        <p class="subtitle">Join the Arena</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="message {% if category == 'success' %}success{% endif %} {% if category == 'account_exists' %}account-exists{% endif %}">
+                    {{ message }}
+                    {% if category == 'account_exists' %}
+                        <div style="margin-top:12px;">
+                            <a href="/login"
+                               style="display:inline-block;padding:10px 18px;border-radius:8px;background:#f5c542;color:#111827;text-decoration:none;font-weight:800;">
+                                LOGIN NOW
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+
+            <label>Username</label>
+            <input
+                type="text"
+                name="username"
+                placeholder="Choose a username"
+                maxlength="30"
+                required
+            >
+
+            <label>Phone Number</label>
+            <input
+                type="tel"
+                name="phone"
+                placeholder="08012345678"
+                maxlength="15"
+                required
+            >
+
+            <label>Referral Code <span style="color:#7891aa;font-weight:400;">(Optional)</span></label>
+            <input
+                type="text"
+                name="referral_code"
+                placeholder="Enter referral code"
+                maxlength="20"
+                autocomplete="off"
+            >
+
+            <div style="color:#7891aa;font-size:13px;margin-top:7px;">
+                Have a referral code? Enter it to link your account to your referrer.
+            </div>
+
+            <label>Password</label>
+            <input
+                type="password"
+                name="password"
+                placeholder="Create a password"
+                minlength="6"
+                required
+            >
+
+            <label>Confirm Password</label>
+            <input
+                type="password"
+                name="confirm_password"
+                placeholder="Repeat your password"
+                minlength="6"
+                required
+            >
+
+            <button type="submit">CREATE ACCOUNT</button>
+
+        </form>
+
+        <div class="bottom">
+            Already have an account?
+            <a href="/login">LOGIN</a>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

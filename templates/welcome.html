@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>WHOT Arena — Play • Compete • Win</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+html{scroll-behavior:smooth}
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:
+      radial-gradient(circle at 50% 0%,rgba(18,83,170,.42),transparent 35%),
+      linear-gradient(180deg,#020817 0%,#061735 48%,#020817 100%);
+    color:#fff;
+    min-height:100vh;
+    overflow-x:hidden;
+}
+
+body:before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:
+      radial-gradient(circle at 10% 30%,rgba(255,32,61,.10),transparent 22%),
+      radial-gradient(circle at 90% 65%,rgba(0,170,255,.10),transparent 25%);
+    z-index:0;
+}
+
+a{text-decoration:none;color:inherit}
+
+.container{
+    width:min(1180px,calc(100% - 30px));
+    margin:auto;
+    position:relative;
+    z-index:1;
+}
+
+/* HEADER */
+header{
+    height:76px;
+    border-bottom:1px solid rgba(74,164,255,.25);
+    background:rgba(2,10,27,.86);
+    backdrop-filter:blur(16px);
+    position:sticky;
+    top:0;
+    z-index:50;
+}
+
+.nav{
+    height:76px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:11px;
+    font-weight:900;
+    letter-spacing:1px;
+}
+
+.mini-logo{
+    width:45px;
+    height:48px;
+    position:relative;
+}
+
+.mini-logo .shield{
+    position:absolute;
+    inset:5px 1px 0;
+    background:linear-gradient(145deg,#ffd94a,#e99a00);
+    clip-path:polygon(50% 0,100% 18%,88% 78%,50% 100%,12% 78%,0 18%);
+}
+
+.mini-logo .shield:after{
+    content:"W";
+    position:absolute;
+    inset:7px;
+    display:grid;
+    place-items:center;
+    background:#071b42;
+    color:#fff;
+    font-size:25px;
+    font-weight:1000;
+    clip-path:polygon(50% 0,100% 18%,88% 78%,50% 100%,12% 78%,0 18%);
+}
+
+.brand-text{
+    font-size:17px;
+}
+
+.brand-text span{color:#ffc928}
+
+.nav-links{
+    display:flex;
+    gap:27px;
+    color:#a9c8ee;
+    font-size:14px;
+}
+
+.nav-links a:hover{color:#fff}
+
+.nav-actions{
+    display:flex;
+    gap:10px;
+}
+
+.btn{
+    border-radius:30px;
+    padding:13px 22px;
+    font-size:13px;
+    font-weight:900;
+    letter-spacing:.4px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    transition:.2s;
+    border:1px solid transparent;
+}
+
+.btn-login{
+    border-color:#20aaff;
+    color:#fff;
+    background:rgba(5,30,65,.65);
+}
+
+.btn-login:hover{
+    background:#087bc4;
+}
+
+.btn-red{
+    background:linear-gradient(135deg,#ff2748,#d9092d);
+    box-shadow:0 8px 28px rgba(255,27,61,.28);
+}
+
+.btn-red:hover{
+    transform:translateY(-2px);
+    box-shadow:0 12px 35px rgba(255,27,61,.4);
+}
+
+/* HERO */
+.hero{
+    padding:72px 0 45px;
+    position:relative;
+}
+
+.hero-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:45px;
+    align-items:center;
+}
+
+.kicker{
+    color:#42c9ff;
+    font-weight:900;
+    font-size:14px;
+    letter-spacing:5px;
+    margin-bottom:16px;
+}
+
+.hero h1{
+    font-size:clamp(50px,7vw,88px);
+    line-height:.88;
+    font-weight:1000;
+    letter-spacing:-4px;
+}
+
+.hero h1 .white{color:#fff}
+
+.hero h1 .gold{
+    color:#ffc52c;
+    text-shadow:0 5px 25px rgba(255,197,44,.2);
+}
+
+.hero-tag{
+    font-size:22px;
+    font-weight:900;
+    margin:23px 0 15px;
+}
+
+.hero-tag span{color:#ff334e}
+
+.hero-copy{
+    color:#a9bddb;
+    max-width:520px;
+    line-height:1.7;
+    font-size:16px;
+}
+
+.hero-buttons{
+    display:flex;
+    gap:13px;
+    margin-top:28px;
+    flex-wrap:wrap;
+}
+
+/* BONUS */
+.bonus{
+    margin-top:25px;
+    display:flex;
+    align-items:center;
+    gap:15px;
+    width:max-content;
+    max-width:100%;
+    padding:13px 20px;
+    border-radius:16px;
+    background:linear-gradient(100deg,rgba(255,28,59,.18),rgba(255,193,35,.14));
+    border:1px solid rgba(255,193,35,.48);
+}
+
+.bonus-icon{font-size:28px}
+
+.bonus small{
+    display:block;
+    color:#aabedb;
+    font-size:11px;
+    margin-bottom:2px;
+}
+
+.bonus strong{
+    color:#ffd34c;
+    font-size:22px;
+}
+
+/* ARENA VISUAL */
+.hero-arena{
+    min-height:390px;
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.glow{
+    position:absolute;
+    width:330px;
+    height:330px;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(0,147,255,.35),transparent 68%);
+}
+
+.arena-ring{
+    width:290px;
+    height:290px;
+    border:2px solid rgba(31,166,255,.65);
+    border-radius:50%;
+    position:relative;
+    display:grid;
+    place-items:center;
+    box-shadow:0 0 55px rgba(0,139,255,.18),inset 0 0 45px rgba(0,139,255,.08);
+}
+
+.arena-ring:before{
+    content:"";
+    position:absolute;
+    width:245px;
+    height:245px;
+    border-radius:50%;
+    border:1px solid rgba(255,196,39,.55);
+}
+
+.trophy{
+    font-size:105px;
+    filter:drop-shadow(0 12px 25px rgba(255,197,40,.3));
+    position:relative;
+    z-index:2;
+}
+
+.floating-card{
+    position:absolute;
+    padding:15px 18px;
+    border-radius:15px;
+    background:rgba(4,18,43,.92);
+    border:1px solid rgba(67,173,255,.45);
+    box-shadow:0 15px 35px rgba(0,0,0,.3);
+    backdrop-filter:blur(10px);
+}
+
+.floating-card b{
+    display:block;
+    font-size:19px;
+    color:#ffd13c;
+}
+
+.floating-card small{
+    color:#9bb8dc;
+}
+
+.card-one{top:20px;left:5px}
+.card-two{right:0;top:85px}
+.card-three{bottom:15px;left:25px}
+
+/* SECTION */
+section{position:relative;z-index:1}
+
+.section-title{
+    text-align:center;
+    margin-bottom:27px;
+}
+
+.section-title .eyebrow{
+    color:#40c9ff;
+    font-size:12px;
+    letter-spacing:4px;
+    font-weight:900;
+}
+
+.section-title h2{
+    margin-top:7px;
+    font-size:32px;
+    font-weight:1000;
+}
+
+.section-title p{
+    color:#829fc5;
+    margin-top:8px;
+}
+
+/* FEATURES */
+.features{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-bottom:70px;
+}
+
+.feature{
+    padding:27px 22px;
+    border:1px solid rgba(66,166,255,.3);
+    border-radius:20px;
+    background:linear-gradient(145deg,rgba(9,35,76,.9),rgba(4,17,40,.9));
+    text-align:center;
+    transition:.2s;
+}
+
+.feature:hover{
+    transform:translateY(-4px);
+    border-color:#2bb5ff;
+}
+
+.feature-icon{
+    width:62px;
+    height:62px;
+    border-radius:50%;
+    margin:0 auto 16px;
+    display:grid;
+    place-items:center;
+    font-size:28px;
+    background:rgba(0,137,255,.12);
+    border:1px solid rgba(53,188,255,.65);
+}
+
+.feature:nth-child(2) .feature-icon{
+    border-color:#ff304e;
+    background:rgba(255,28,60,.12);
+}
+
+.feature:nth-child(3) .feature-icon{
+    border-color:#ffd039;
+    background:rgba(255,192,37,.1);
+}
+
+.feature h3{font-size:19px;margin-bottom:8px}
+
+.feature p{
+    color:#8da8cb;
+    line-height:1.55;
+    font-size:14px;
+}
+
+/* BONUS PANEL */
+.bonus-panel{
+    padding:32px;
+    border-radius:25px;
+    border:1px solid rgba(255,193,40,.4);
+    background:
+      radial-gradient(circle at 85% 50%,rgba(255,46,67,.16),transparent 30%),
+      linear-gradient(110deg,#101d43,#071735);
+    margin-bottom:70px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:30px;
+}
+
+.bonus-panel h2{
+    font-size:34px;
+    color:#ffd044;
+    margin-bottom:7px;
+}
+
+.bonus-panel p{
+    color:#a5b9d6;
+    line-height:1.6;
+}
+
+.big-bonus{
+    min-width:190px;
+    text-align:center;
+    padding:20px;
+    border-radius:20px;
+    background:linear-gradient(145deg,#ff2b4b,#c8072a);
+    box-shadow:0 15px 35px rgba(255,24,59,.25);
+}
+
+.big-bonus small{
+    display:block;
+    font-weight:800;
+    opacity:.9;
+}
+
+.big-bonus strong{
+    font-size:48px;
+    color:#fff;
+}
+
+/* GAME MODES */
+.modes{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+    margin-bottom:70px;
+}
+
+.mode{
+    min-height:190px;
+    padding:27px;
+    border-radius:21px;
+    border:1px solid rgba(63,163,255,.27);
+    background:linear-gradient(145deg,rgba(9,36,79,.9),rgba(4,16,39,.9));
+    position:relative;
+    overflow:hidden;
+}
+
+.mode:after{
+    content:"";
+    position:absolute;
+    width:130px;
+    height:130px;
+    border-radius:50%;
+    background:rgba(0,150,255,.08);
+    right:-35px;
+    bottom:-45px;
+}
+
+.mode.red{border-color:rgba(255,42,70,.35)}
+
+.mode.gold{border-color:rgba(255,199,46,.35)}
+
+.mode-icon{
+    font-size:32px;
+    margin-bottom:15px;
+}
+
+.mode h3{font-size:22px;margin-bottom:7px}
+
+.mode p{
+    color:#8ca8ca;
+    line-height:1.5;
+    max-width:430px;
+}
+
+/* HOW */
+.steps{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    margin-bottom:70px;
+}
+
+.step{
+    padding:22px 15px;
+    text-align:center;
+    border-radius:18px;
+    background:rgba(7,26,58,.75);
+    border:1px solid rgba(62,150,230,.23);
+}
+
+.step-number{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    margin:0 auto 12px;
+    background:#0d65aa;
+    font-weight:1000;
+}
+
+.step h4{margin-bottom:7px}
+
+.step p{
+    color:#819dc2;
+    font-size:13px;
+    line-height:1.45;
+}
+
+/* REWARDS */
+.rewards{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-bottom:70px;
+}
+
+.reward{
+    padding:24px;
+    border-radius:19px;
+    background:linear-gradient(145deg,#091f46,#05132f);
+    border:1px solid rgba(73,163,255,.25);
+}
+
+.reward strong{
+    font-size:28px;
+    color:#ffd03d;
+    display:block;
+    margin-bottom:6px;
+}
+
+.reward h3{font-size:16px;margin-bottom:7px}
+
+.reward p{
+    color:#829fc4;
+    font-size:13px;
+    line-height:1.5;
+}
+
+/* REFERRAL */
+.referral{
+    border-radius:25px;
+    padding:34px;
+    background:linear-gradient(100deg,#071c3d,#0b244e);
+    border:1px solid rgba(255,193,39,.35);
+    margin-bottom:70px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:30px;
+}
+
+.referral h2{
+    color:#ffd03d;
+    font-size:29px;
+    margin-bottom:9px;
+}
+
+.referral p{
+    color:#9db4d4;
+    line-height:1.6;
+}
+
+.referral-amount{
+    text-align:center;
+    white-space:nowrap;
+}
+
+.referral-amount strong{
+    color:#ff3c54;
+    font-size:40px;
+    display:block;
+}
+
+.referral-amount span{
+    color:#a6bada;
+    font-size:12px;
+}
+
+/* TRUST */
+.trust{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    margin-bottom:60px;
+}
+
+.trust-item{
+    padding:21px 12px;
+    text-align:center;
+    border-radius:16px;
+    background:rgba(8,28,59,.72);
+}
+
+.trust-item b{
+    display:block;
+    font-size:14px;
+    margin-top:9px;
+}
+
+.trust-item span{font-size:25px}
+
+.trust-item small{
+    color:#819dc0;
+    display:block;
+    margin-top:5px;
+}
+
+/* FINAL CTA */
+.final{
+    text-align:center;
+    padding:65px 20px;
+    border-top:1px solid rgba(64,156,235,.15);
+}
+
+.final h2{
+    font-size:40px;
+    font-weight:1000;
+    margin-bottom:9px;
+}
+
+.final p{
+    color:#91acce;
+    margin-bottom:25px;
+}
+
+.final-buttons{
+    display:flex;
+    justify-content:center;
+    gap:13px;
+    flex-wrap:wrap;
+}
+
+/* FOOTER */
+footer{
+    padding:25px 15px 35px;
+    text-align:center;
+    color:#6886ab;
+    font-size:12px;
+    border-top:1px solid rgba(72,149,219,.15);
+}
+
+.footer-brand{
+    color:#d8e6fa;
+    font-weight:900;
+    letter-spacing:2px;
+    margin-bottom:9px;
+}
+
+.footer-brand span{color:#ffc832}
+
+/* MOBILE */
+@media(max-width:800px){
+    header,.nav{height:65px}
+
+    .nav-links{display:none}
+
+    .brand-text{font-size:14px}
+
+    .nav-actions .btn{
+        padding:10px 14px;
+        font-size:11px;
+    }
+
+    .nav-actions .btn-red{display:none}
+
+    .container{
+        width:min(100% - 22px,600px);
+    }
+
+    .hero{
+        padding:48px 0 30px;
+    }
+
+    .hero-grid{
+        grid-template-columns:1fr;
+        gap:20px;
+    }
+
+    .hero h1{
+        font-size:57px;
+        letter-spacing:-3px;
+    }
+
+    .hero-tag{font-size:20px}
+
+    .hero-copy{font-size:14px}
+
+    .hero-buttons{
+        display:grid;
+        grid-template-columns:1fr;
+    }
+
+    .hero-buttons .btn{
+        width:100%;
+    }
+
+    .bonus{width:100%}
+
+    .hero-arena{
+        min-height:300px;
+        order:-1;
+    }
+
+    .arena-ring{
+        width:225px;
+        height:225px;
+    }
+
+    .arena-ring:before{
+        width:190px;
+        height:190px;
+    }
+
+    .trophy{font-size:78px}
+
+    .glow{
+        width:270px;
+        height:270px;
+    }
+
+    .floating-card{
+        padding:10px 12px;
+    }
+
+    .floating-card b{font-size:15px}
+
+    .floating-card small{font-size:10px}
+
+    .card-one{left:0;top:8px}
+    .card-two{right:0;top:60px}
+    .card-three{left:3px;bottom:5px}
+
+    .features,
+    .rewards{
+        grid-template-columns:1fr;
+    }
+
+    .modes{
+        grid-template-columns:1fr;
+    }
+
+    .steps{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .trust{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .bonus-panel,
+    .referral{
+        flex-direction:column;
+        text-align:center;
+        padding:25px 18px;
+    }
+
+    .bonus-panel h2{font-size:27px}
+
+    .big-bonus{
+        width:100%;
+    }
+
+    .referral-amount{
+        width:100%;
+    }
+
+    .section-title h2{font-size:27px}
+
+    .final h2{font-size:32px}
+}
+
+@media(max-width:390px){
+    .hero h1{font-size:49px}
+
+    .steps{
+        gap:8px;
+    }
+
+    .step{
+        padding:18px 9px;
+    }
+
+    .step h4{font-size:13px}
+    .step p{font-size:11px}
+}
+
+/* ===== COMPACT PREMIUM REDESIGN ===== */
+
+body{
+    background:
+      radial-gradient(circle at 15% 10%,rgba(125,45,255,.22),transparent 27%),
+      radial-gradient(circle at 85% 25%,rgba(0,207,255,.16),transparent 25%),
+      radial-gradient(circle at 50% 80%,rgba(255,28,92,.10),transparent 30%),
+      #03091d;
+    color:#d9dcff;
+}
+
+header{
+    height:62px;
+    background:rgba(3,8,25,.94);
+    border-bottom:1px solid rgba(123,76,255,.35);
+}
+
+.nav{height:62px}
+
+.mini-logo{
+    width:37px;
+    height:39px;
+}
+
+.mini-logo .shield:after{
+    color:#ffd13b;
+    font-size:20px;
+}
+
+.brand-text{
+    font-size:14px;
+    color:#dce1ff;
+}
+
+.brand-text span{
+    color:#ffca38;
+}
+
+.nav-links{
+    gap:20px;
+    font-size:12px;
+}
+
+.nav-links a:hover{
+    color:#39d8ff;
+}
+
+.nav-actions{
+    gap:7px;
+}
+
+.btn{
+    padding:9px 16px;
+    font-size:11px;
+}
+
+.btn-login{
+    border-color:#31caff;
+    color:#31caff;
+}
+
+.btn-login:hover{
+    background:#132b62;
+}
+
+.btn-red{
+    background:linear-gradient(135deg,#ff2460,#9d25ff);
+    box-shadow:0 7px 22px rgba(255,36,96,.25);
+}
+
+/* HERO */
+.hero{
+    padding:43px 0 28px;
+}
+
+.hero-grid{
+    gap:28px;
+}
+
+.kicker{
+    color:#39d8ff;
+    font-size:10px;
+    letter-spacing:3px;
+    margin-bottom:10px;
+}
+
+.hero h1{
+    font-size:clamp(39px,6vw,66px);
+    line-height:.9;
+    letter-spacing:-2px;
+}
+
+.hero h1 .white{
+    color:#dfe4ff;
+}
+
+.hero h1 .gold{
+    color:#ffc832;
+    text-shadow:0 4px 20px rgba(255,200,50,.2);
+}
+
+.hero-tag{
+    font-size:16px;
+    margin:15px 0 10px;
+    color:#c8cced;
+}
+
+.hero-tag span{
+    color:#ff3c78;
+}
+
+.hero-copy{
+    max-width:470px;
+    line-height:1.5;
+    font-size:13px;
+    color:#8795bd;
+}
+
+.hero-buttons{
+    gap:9px;
+    margin-top:18px;
+}
+
+.bonus{
+    margin-top:15px;
+    gap:10px;
+    padding:9px 13px;
+    border-radius:12px;
+    border-color:rgba(255,200,50,.45);
+    background:linear-gradient(100deg,rgba(157,37,255,.16),rgba(255,36,96,.12));
+}
+
+.bonus-icon{
+    font-size:20px;
+}
+
+.bonus small{
+    font-size:9px;
+}
+
+.bonus strong{
+    font-size:16px;
+    color:#ffd044;
+}
+
+/* HERO ARENA */
+.hero-arena{
+    min-height:300px;
+}
+
+.glow{
+    width:250px;
+    height:250px;
+    background:radial-gradient(circle,rgba(89,41,255,.30),transparent 68%);
+}
+
+.arena-ring{
+    width:215px;
+    height:215px;
+    border-color:rgba(45,204,255,.55);
+    box-shadow:0 0 42px rgba(0,191,255,.14),inset 0 0 35px rgba(89,41,255,.10);
+}
+
+.arena-ring:before{
+    width:180px;
+    height:180px;
+    border-color:rgba(255,200,50,.42);
+}
+
+.trophy{
+    font-size:70px;
+}
+
+.floating-card{
+    padding:9px 12px;
+    border-radius:11px;
+    border-color:rgba(133,77,255,.42);
+}
+
+.floating-card b{
+    font-size:13px;
+}
+
+.floating-card small{
+    font-size:9px;
+}
+
+.card-one{
+    top:15px;
+    left:0;
+}
+
+.card-two{
+    right:0;
+    top:65px;
+}
+
+.card-three{
+    bottom:5px;
+    left:15px;
+}
+
+/* SECTIONS */
+.section-title{
+    margin-bottom:18px;
+}
+
+.section-title .eyebrow{
+    color:#39d8ff;
+    font-size:9px;
+    letter-spacing:3px;
+}
+
+.section-title h2{
+    margin-top:5px;
+    font-size:24px;
+    color:#e0e2ff;
+}
+
+.section-title p{
+    color:#7485ad;
+    margin-top:5px;
+    font-size:12px;
+}
+
+/* FEATURES */
+.features{
+    gap:10px;
+    margin-bottom:42px;
+}
+
+.feature{
+    padding:19px 15px;
+    border-radius:14px;
+    background:linear-gradient(145deg,rgba(22,22,72,.9),rgba(6,14,39,.94));
+    border-color:rgba(79,65,191,.42);
+}
+
+.feature:hover{
+    border-color:#42d8ff;
+}
+
+.feature-icon{
+    width:46px;
+    height:46px;
+    font-size:21px;
+    margin-bottom:10px;
+}
+
+.feature h3{
+    font-size:15px;
+    margin-bottom:5px;
+    color:#d9ddff;
+}
+
+.feature p{
+    font-size:11px;
+    line-height:1.4;
+    color:#7e8db3;
+}
+
+/* WELCOME BONUS */
+.bonus-panel{
+    padding:21px;
+    border-radius:17px;
+    margin-bottom:42px;
+    gap:18px;
+    border-color:rgba(255,200,50,.38);
+    background:
+      radial-gradient(circle at 85% 50%,rgba(255,35,100,.13),transparent 30%),
+      linear-gradient(110deg,#101440,#071432);
+}
+
+.bonus-panel h2{
+    font-size:23px;
+    color:#ffc934;
+}
+
+.bonus-panel p{
+    font-size:11px;
+    line-height:1.45;
+}
+
+.big-bonus{
+    min-width:135px;
+    padding:14px;
+    border-radius:14px;
+    background:linear-gradient(145deg,#ff275f,#8e28e8);
+}
+
+.big-bonus small{
+    font-size:9px;
+}
+
+.big-bonus strong{
+    font-size:35px;
+}
+
+/* GAME MODES */
+.modes{
+    gap:10px;
+    margin-bottom:42px;
+}
+
+.mode{
+    min-height:140px;
+    padding:19px;
+    border-radius:15px;
+    background:linear-gradient(145deg,rgba(17,28,70,.92),rgba(5,13,36,.94));
+}
+
+.mode-icon{
+    font-size:24px;
+    margin-bottom:10px;
+}
+
+.mode h3{
+    font-size:17px;
+    margin-bottom:5px;
+    color:#dce0ff;
+}
+
+.mode p{
+    font-size:11px;
+    line-height:1.45;
+    color:#7f90b7;
+}
+
+/* HOW */
+.steps{
+    gap:8px;
+    margin-bottom:42px;
+}
+
+.step{
+    padding:16px 10px;
+    border-radius:13px;
+    background:rgba(12,24,58,.82);
+    border-color:rgba(78,70,173,.35);
+}
+
+.step-number{
+    width:30px;
+    height:30px;
+    margin-bottom:9px;
+    background:linear-gradient(135deg,#176dd1,#7134df);
+    font-size:12px;
+}
+
+.step h4{
+    font-size:12px;
+    color:#d8dcff;
+    margin-bottom:5px;
+}
+
+.step p{
+    font-size:10px;
+    color:#7182aa;
+}
+
+/* REWARDS */
+.rewards{
+    gap:10px;
+    margin-bottom:42px;
+}
+
+.reward{
+    padding:18px;
+    border-radius:14px;
+    background:linear-gradient(145deg,#121746,#07112e);
+}
+
+.reward strong{
+    font-size:24px;
+    color:#ffc934;
+}
+
+.reward h3{
+    font-size:14px;
+    color:#dce0ff;
+}
+
+.reward p{
+    font-size:10px;
+    line-height:1.45;
+    color:#7889b0;
+}
+
+/* REFERRAL */
+.referral{
+    border-radius:17px;
+    padding:22px;
+    margin-bottom:42px;
+    gap:20px;
+    border-color:rgba(255,61,121,.38);
+    background:
+      radial-gradient(circle at 15% 50%,rgba(142,40,232,.17),transparent 32%),
+      linear-gradient(100deg,#0c143c,#081b3b);
+}
+
+.referral h2{
+    color:#c9a4ff;
+    font-size:22px;
+    margin-bottom:6px;
+}
+
+.referral p{
+    font-size:11px;
+    line-height:1.45;
+    color:#7f90b7;
+}
+
+.referral-amount strong{
+    color:#ff3d78;
+    font-size:32px;
+}
+
+.referral-amount span{
+    font-size:9px;
+    color:#8090b5;
+}
+
+/* TRUST */
+.trust{
+    gap:8px;
+    margin-bottom:42px;
+}
+
+.trust-item{
+    padding:15px 9px;
+    border-radius:12px;
+    background:rgba(12,25,58,.75);
+}
+
+.trust-item span{
+    font-size:20px;
+}
+
+.trust-item b{
+    font-size:11px;
+    color:#d5daff;
+    margin-top:6px;
+}
+
+.trust-item small{
+    font-size:9px;
+    color:#7183aa;
+    margin-top:3px;
+}
+
+/* FINAL */
+.final{
+    padding:43px 15px;
+}
+
+.final h2{
+    font-size:29px;
+    color:#dfe3ff;
+    margin-bottom:6px;
+}
+
+.final p{
+    font-size:11px;
+    color:#7d8fb6;
+    margin-bottom:17px;
+}
+
+/* FOOTER */
+footer{
+    padding:20px 12px 27px;
+    color:#566a94;
+    font-size:9px;
+}
+
+.footer-brand{
+    color:#aeb8dd;
+    margin-bottom:6px;
+}
+
+/* MOBILE */
+@media(max-width:800px){
+
+    .container{
+        width:calc(100% - 20px);
+    }
+
+    .nav-links{
+        display:none;
+    }
+
+    .hero{
+        padding:30px 0 20px;
+    }
+
+    .hero-grid{
+        gap:12px;
+    }
+
+    .hero-arena{
+        min-height:225px;
+        order:-1;
+    }
+
+    .arena-ring{
+        width:175px;
+        height:175px;
+    }
+
+    .arena-ring:before{
+        width:145px;
+        height:145px;
+    }
+
+    .trophy{
+        font-size:57px;
+    }
+
+    .glow{
+        width:210px;
+        height:210px;
+    }
+
+    .floating-card{
+        padding:7px 9px;
+    }
+
+    .floating-card b{
+        font-size:10px;
+    }
+
+    .floating-card small{
+        font-size:7px;
+    }
+
+    .card-one{
+        top:3px;
+    }
+
+    .card-two{
+        top:42px;
+    }
+
+    .card-three{
+        bottom:0;
+    }
+
+    .hero h1{
+        font-size:48px;
+    }
+
+    .hero-tag{
+        font-size:14px;
+    }
+
+    .hero-copy{
+        font-size:11px;
+    }
+
+    .features{
+        grid-template-columns:repeat(3,1fr);
+    }
+
+    .feature{
+        padding:14px 8px;
+    }
+
+    .feature-icon{
+        width:38px;
+        height:38px;
+        font-size:17px;
+    }
+
+    .feature h3{
+        font-size:12px;
+    }
+
+    .feature p{
+        font-size:9px;
+    }
+
+    .modes{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .mode{
+        min-height:125px;
+        padding:15px;
+    }
+
+    .mode h3{
+        font-size:14px;
+    }
+
+    .mode p{
+        font-size:9px;
+    }
+
+    .bonus-panel{
+        flex-direction:row;
+        padding:17px 13px;
+    }
+
+    .bonus-panel h2{
+        font-size:18px;
+    }
+
+    .bonus-panel p{
+        font-size:9px;
+    }
+
+    .big-bonus{
+        min-width:105px;
+    }
+
+    .big-bonus strong{
+        font-size:28px;
+    }
+
+    .rewards{
+        grid-template-columns:1fr 1fr 1fr;
+    }
+
+    .reward{
+        padding:14px 10px;
+    }
+
+    .reward strong{
+        font-size:20px;
+    }
+
+    .reward h3{
+        font-size:11px;
+    }
+
+    .reward p{
+        font-size:8px;
+    }
+
+    .referral{
+        padding:18px 14px;
+    }
+
+    .referral h2{
+        font-size:18px;
+    }
+
+    .referral p{
+        font-size:9px;
+    }
+
+    .referral-amount strong{
+        font-size:28px;
+    }
+
+    .trust-item{
+        padding:12px 7px;
+    }
+
+    .final-buttons .btn{
+        padding:10px 13px;
+    }
+}
+
+@media(max-width:390px){
+
+    .hero h1{
+        font-size:43px;
+    }
+
+    .features{
+        gap:6px;
+    }
+
+    .feature h3{
+        font-size:10px;
+    }
+
+    .feature p{
+        font-size:8px;
+    }
+
+    .modes{
+        gap:7px;
+    }
+
+    .rewards{
+        gap:6px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="container nav">
+
+<a href="/" class="brand">
+    <div class="mini-logo">
+        <div class="shield"></div>
+    </div>
+    <div class="brand-text">WHOT <span>ARENA</span></div>
+</a>
+
+<nav class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#modes">Games</a>
+    <a href="#how">How It Works</a>
+    <a href="#rewards">Rewards</a>
+</nav>
+
+<div class="nav-actions">
+    <a href="/login" class="btn btn-login">LOGIN</a>
+    <a href="/register" class="btn btn-red">CREATE ACCOUNT</a>
+</div>
+
+</div>
+</header>
+
+
+<main>
+
+<!-- HERO -->
+<section class="hero">
+<div class="container hero-grid">
+
+<div>
+    <div class="kicker">WELCOME TO THE ARENA</div>
+
+    <h1>
+        <span class="white">WHOT</span><br>
+        <span class="gold">ARENA</span>
+    </h1>
+
+    <div class="hero-tag">
+        PLAY <span>•</span> COMPETE <span>•</span> WIN
+    </div>
+
+    <p class="hero-copy">
+        Step into the ultimate online WHOT experience.
+        Challenge players, test your skills, compete for rewards
+        and build your name in the Arena.
+    </p>
+
+    <div class="hero-buttons">
+        <a href="/register" class="btn btn-red">CREATE ACCOUNT →</a>
+        <a href="/login" class="btn btn-login">LOGIN TO YOUR ACCOUNT</a>
+    </div>
+
+    <div class="bonus">
+        <div class="bonus-icon">🎁</div>
+        <div>
+            <small>NEW PLAYERS</small>
+            <strong>WIN ₦75 WELCOME BONUS</strong>
+        </div>
+    </div>
+</div>
+
+
+<div class="hero-arena">
+
+    <div class="glow"></div>
+
+    <div class="floating-card card-one">
+        <b>⚡ QUICK MATCH</b>
+        <small>Find your next opponent</small>
+    </div>
+
+    <div class="floating-card card-two">
+        <b>🏆 COMPETE</b>
+        <small>Challenge other players</small>
+    </div>
+
+    <div class="floating-card card-three">
+        <b>₦ REWARDS</b>
+        <small>Play eligible games</small>
+    </div>
+
+    <div class="arena-ring">
+        <div class="trophy">🏆</div>
+    </div>
+
+</div>
+
+</div>
+</section>
+
+
+<!-- FEATURES -->
+<section id="features">
+<div class="container">
+
+<div class="section-title">
+    <div class="eyebrow">INSIDE THE ARENA</div>
+    <h2>Everything You Need To Play</h2>
+    <p>Built for players who love the game.</p>
+</div>
+
+<div class="features">
+
+<div class="feature">
+    <div class="feature-icon">⚡</div>
+    <h3>Quick Matches</h3>
+    <p>Get into the Arena and find an opponent ready to play.</p>
+</div>
+
+<div class="feature">
+    <div class="feature-icon">⚔️</div>
+    <h3>Challenge Players</h3>
+    <p>Compete head-to-head and prove your WHOT skills.</p>
+</div>
+
+<div class="feature">
+    <div class="feature-icon">🏆</div>
+    <h3>Play For Rewards</h3>
+    <p>Eligible games can earn prizes while you compete.</p>
+</div>
+
+</div>
+</div>
+</section>
+
+
+<!-- WELCOME BONUS -->
+<section>
+<div class="container">
+
+<div class="bonus-panel">
+    <div>
+        <div class="section-title" style="text-align:left;margin-bottom:0">
+            <div class="eyebrow">NEW PLAYER REWARD</div>
+            <h2>Start With A ₦75 Welcome Bonus</h2>
+            <p>
+                Create your WHOT Arena account and receive the
+                welcome bonus according to the Arena's applicable
+                bonus terms.
+            </p>
+        </div>
+    </div>
+
+    <div class="big-bonus">
+        <small>WELCOME BONUS</small>
+        <strong>₦75</strong>
+    </div>
+</div>
+
+</div>
+</section>
+
+
+<!-- GAME MODES -->
+<section id="modes">
+<div class="container">
+
+<div class="section-title">
+    <div class="eyebrow">CHOOSE YOUR BATTLE</div>
+    <h2>Enter The Arena</h2>
+    <p>Different ways to experience WHOT.</p>
+</div>
+
+<div class="modes">
+
+<div class="mode">
+    <div class="mode-icon">⚡</div>
+    <h3>Normal Games</h3>
+    <p>
+        Choose your game and enter a head-to-head match
+        against another player.
+    </p>
+</div>
+
+<div class="mode red">
+    <div class="mode-icon">⚔️</div>
+    <h3>Challenge Players</h3>
+    <p>
+        Challenge another player and settle the match
+        on the WHOT table.
+    </p>
+</div>
+
+<div class="mode gold">
+    <div class="mode-icon">🏆</div>
+    <h3>Tournaments</h3>
+    <p>
+        Join scheduled competitions and battle through
+        the tournament for the available prize.
+    </p>
+</div>
+
+<div class="mode">
+    <div class="mode-icon">👑</div>
+    <h3>Champion Board</h3>
+    <p>
+        Track notable Arena players, results and
+        tournament achievements.
+    </p>
+</div>
+
+</div>
+</div>
+</section>
+
+
+<!-- HOW IT WORKS -->
+<section id="how">
+<div class="container">
+
+<div class="section-title">
+    <div class="eyebrow">SIMPLE PROCESS</div>
+    <h2>How WHOT Arena Works</h2>
+</div>
+
+<div class="steps">
+
+<div class="step">
+    <div class="step-number">1</div>
+    <h4>Create Account</h4>
+    <p>Register your WHOT Arena account.</p>
+</div>
+
+<div class="step">
+    <div class="step-number">2</div>
+    <h4>Add Funds</h4>
+    <p>Fund your wallet when you're ready to play.</p>
+</div>
+
+<div class="step">
+    <div class="step-number">3</div>
+    <h4>Choose A Game</h4>
+    <p>Enter a normal game or tournament.</p>
+</div>
+
+<div class="step">
+    <div class="step-number">4</div>
+    <h4>Play & Win</h4>
+    <p>Play the match and receive eligible rewards.</p>
+</div>
+
+</div>
+</div>
+</section>
+
+
+<!-- REWARDS -->
+<section id="rewards">
+<div class="container">
+
+<div class="section-title">
+    <div class="eyebrow">ARENA BENEFITS</div>
+    <h2>More Reasons To Play</h2>
+</div>
+
+<div class="rewards">
+
+<div class="reward">
+    <strong>₦25</strong>
+    <h3>Referral Reward</h3>
+    <p>Earn ₦25 for each qualifying referral under the Arena referral rules.</p>
+</div>
+
+<div class="reward">
+    <strong>₦100</strong>
+    <h3>Minimum Add Funds</h3>
+    <p>Add funds from just ₦100 when you're ready to play.</p>
+</div>
+
+<div class="reward">
+    <strong>₦200</strong>
+    <h3>Minimum Cash Out</h3>
+    <p>Cash out eligible funds from ₦200.</p>
+</div>
+
+</div>
+</div>
+</section>
+
+
+<!-- REFERRAL -->
+<section>
+<div class="container">
+
+<div class="referral">
+
+<div>
+    <div class="eyebrow">INVITE & EARN</div>
+    <h2>Bring Your Friends Into The Arena</h2>
+    <p>
+        Share your referral code with friends.
+        Qualifying referrals can earn a ₦25 referral reward
+        according to the Arena referral rules.
+    </p>
+</div>
+
+<div class="referral-amount">
+    <strong>₦25</strong>
+    <span>PER QUALIFYING REFERRAL</span>
+</div>
+
+</div>
+
+</div>
+</section>
+
+
+<!-- TRUST -->
+<section>
+<div class="container">
+
+<div class="section-title">
+    <div class="eyebrow">BUILT FOR PLAYERS</div>
+    <h2>Play With Confidence</h2>
+</div>
+
+<div class="trust">
+
+<div class="trust-item">
+    <span>🔐</span>
+    <b>Secure Accounts</b>
+    <small>Protected login</small>
+</div>
+
+<div class="trust-item">
+    <span>⚡</span>
+    <b>Fast Experience</b>
+    <small>Designed for mobile</small>
+</div>
+
+<div class="trust-item">
+    <span>💳</span>
+    <b>Wallet System</b>
+    <small>Add funds & cash out</small>
+</div>
+
+<div class="trust-item">
+    <span>🎧</span>
+    <b>Player Support</b>
+    <small>Help when needed</small>
+</div>
+
+</div>
+
+</div>
+</section>
+
+
+<!-- FINAL CTA -->
+<section class="final">
+<div class="container">
+
+<h2>Ready To Enter The Arena?</h2>
+<p>Create your account and start your WHOT journey.</p>
+
+<div class="final-buttons">
+    <a href="/register" class="btn btn-red">CREATE ACCOUNT →</a>
+    <a href="/login" class="btn btn-login">LOGIN TO YOUR ACCOUNT</a>
+</div>
+
+</div>
+</section>
+
+</main>
+
+
+<footer>
+    <div class="footer-brand">WHOT <span>ARENA</span></div>
+    <div>PLAY • COMPETE • WIN</div>
+    <div style="margin-top:8px">© 2026 WHOT Arena</div>
+</footer>
+
+</body>
+</html>

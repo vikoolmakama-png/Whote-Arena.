@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - WHOT Arena</title>
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:linear-gradient(145deg,#02082b,#071b58,#03102f);
+    color:#fff;
+    min-height:100vh;
+}
+.header{
+    padding:24px 18px;
+    background:rgba(3,12,48,.95);
+    border-bottom:1px solid #176cff;
+}
+.logo{
+    color:#ffd21c;
+    font-size:28px;
+    font-weight:1000;
+}
+.logo span{
+    color:#fff;
+    font-size:15px;
+    letter-spacing:5px;
+}
+.container{
+    max-width:1000px;
+    margin:auto;
+    padding:22px 15px 40px;
+}
+h1{
+    margin:5px 0 5px;
+    font-size:27px;
+}
+.subtitle{
+    color:#91b5e9;
+    margin-bottom:22px;
+}
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+}
+.stat{
+    background:rgba(8,29,86,.9);
+    border:1px solid #176cff;
+    border-radius:18px;
+    padding:20px 15px;
+    box-shadow:0 0 20px rgba(0,100,255,.12);
+}
+.icon{font-size:25px}
+.label{
+    color:#9bbce9;
+    font-size:12px;
+    margin-top:10px;
+}
+.value{
+    color:#ffd21c;
+    font-size:25px;
+    font-weight:1000;
+    margin-top:5px;
+}
+.section{
+    margin-top:24px;
+    background:rgba(5,20,65,.94);
+    border:1px solid #124da8;
+    border-radius:20px;
+    padding:18px;
+}
+.section h2{
+    margin:0 0 15px;
+    font-size:19px;
+}
+.table-wrap{overflow-x:auto}
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:500px;
+}
+th,td{
+    padding:12px 10px;
+    text-align:left;
+    border-bottom:1px solid #173b78;
+    font-size:13px;
+}
+th{
+    color:#8fc5ff;
+    font-size:11px;
+    text-transform:uppercase;
+}
+.empty{
+    color:#8ca9d5;
+    text-align:center;
+    padding:22px;
+}
+.status{
+    padding:5px 9px;
+    border-radius:20px;
+    background:#173e78;
+    color:#fff;
+    font-size:11px;
+    font-weight:bold;
+}
+@media(max-width:650px){
+    .stats{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+    <div class="logo">WHOT <span>ARENA</span></div>
+</header>
+
+<main class="container">
+    <h1>Admin Dashboard</h1>
+    <div class="subtitle">Users, deposits and withdrawals</div>
+
+    <div class="stats">
+        <div class="stat">
+            <div class="icon">👥</div>
+            <div class="label">TOTAL USERS</div>
+            <div class="value">{{ total_users }}</div>
+        </div>
+
+        <div class="stat">
+            <div class="icon">💰</div>
+            <div class="label">TOTAL DEPOSITS</div>
+            <div class="value">₦{{ "{:,}".format(total_deposits) }}</div>
+        </div>
+
+        <div class="stat">
+            <div class="icon">💸</div>
+            <div class="label">TOTAL WITHDRAWALS</div>
+            <div class="value">₦{{ "{:,}".format(total_withdrawals) }}</div>
+        </div>
+    </div>
+
+    <section class="section">
+        <h2>💰 Recent Deposits</h2>
+        <div class="table-wrap">
+        <table>
+            <tr>
+                <th>User</th>
+                <th>Amount</th>
+                <th>Sender</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+
+            {% for item in deposits %}
+            <tr>
+                <td>{{ item.username }}</td>
+                <td>₦{{ "{:,}".format(item.amount) }}</td>
+                <td>{{ item.sender_name or "—" }}</td>
+
+                <td>
+                    <span class="status">{{ item.status|upper }}</span>
+                    {% if item.rejection_reason %}
+                    <div style="color:#ff9da5;font-size:11px;margin-top:6px;">
+                        {{ item.rejection_reason }}
+                    </div>
+                    {% endif %}
+                </td>
+
+                <td>{{ item.created_at }}</td>
+
+                <td>
+                    {% if item.status == "pending" %}
+                    <form method="POST"
+                          action="/admin/deposit/{{ item.id }}/approve"
+                          style="margin-bottom:8px;">
+                        <button type="submit"
+                                style="background:#19c56b;color:white;border:0;border-radius:9px;padding:9px 12px;font-weight:800;">
+                            ✓ APPROVE
+                        </button>
+                    </form>
+
+                    <form method="POST"
+                          action="/admin/deposit/{{ item.id }}/reject">
+                        <input type="text"
+                               name="reason"
+                               placeholder="Reason for rejection"
+                               required
+                               style="width:100%;padding:9px;border-radius:8px;border:1px solid #31558f;background:#071b50;color:white;margin-bottom:6px;">
+                        <button type="submit"
+                                style="background:#e5394f;color:white;border:0;border-radius:9px;padding:9px 12px;font-weight:800;">
+                            ✕ REJECT
+                        </button>
+                    </form>
+                    {% else %}
+                    <span style="color:#8da9d5;font-size:11px;">REVIEWED</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="empty">No deposits yet.</td>
+            </tr>
+            {% endfor %}
+        </table>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>💸 Recent Withdrawals</h2>
+        <div class="table-wrap">
+        <table>
+            <tr>
+                <th>User</th>
+                <th>Amount</th>
+                <th>Bank</th>
+                <th>Account Name</th>
+                <th>Account Number</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+
+            {% for item in withdrawals %}
+            <tr>
+                <td>{{ item.username }}</td>
+                <td>₦{{ "{:,}".format(item.amount) }}</td>
+                <td>{{ item.bank_name }}</td>
+                <td>{{ item.account_name }}</td>
+                <td>{{ item.account_number }}</td>
+                <td>
+                    <span class="status">{{ item.status|upper }}</span>
+                    {% if item.rejection_reason %}
+                        <div style="font-size:12px;margin-top:5px;">
+                            {{ item.rejection_reason }}
+                        </div>
+                    {% endif %}
+                </td>
+                <td>{{ item.created_at }}</td>
+                <td>
+                    {% if item.status == "pending" %}
+
+                    <form method="POST"
+                          action="/admin/withdraw/{{ item.id }}/approve"
+                          style="display:inline;">
+                        <button type="submit"
+                                style="background:#16a34a;color:white;border:0;padding:8px 12px;border-radius:7px;cursor:pointer;">
+                            ✓ Approve
+                        </button>
+                    </form>
+
+                    <form method="POST"
+                          action="/admin/withdraw/{{ item.id }}/reject"
+                          style="display:inline;margin-top:5px;">
+                        <input type="text"
+                               name="reason"
+                               placeholder="Reason (optional)"
+                               style="width:150px;padding:7px;border-radius:6px;border:1px solid #334155;">
+                        <button type="submit"
+                                style="background:#dc2626;color:white;border:0;padding:8px 12px;border-radius:7px;cursor:pointer;">
+                            ✕ Reject
+                        </button>
+                    </form>
+
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+            </tr>
+
+            {% else %}
+            <tr>
+                <td colspan="8" class="empty">No withdrawals yet.</td>
+            </tr>
+            {% endfor %}
+        </table>
+        </div>
+    </section>
+
+</main>
+
+</body>
+</html>
