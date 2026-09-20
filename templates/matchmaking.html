@@ -153,8 +153,7 @@ const timer = setInterval(function(){
     if(seconds <= 0){
         clearInterval(timer);
         countEl.textContent = "0";
-        statusEl.textContent = "No player found. Switching to AI...";
-        setTimeout(switchToAI,400);
+        switchToAI();
     }
 },1000);
 
