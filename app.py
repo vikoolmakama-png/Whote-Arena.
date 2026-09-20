@@ -250,6 +250,7 @@ def register():
             INSERT INTO users
             (username, phone, password_hash, balance, referral_code, referred_by, device_token)
             VALUES (?, ?, ?, 75, ?, ?, ?)
+            RETURNING id
             """,
             (
                 username,
@@ -261,7 +262,7 @@ def register():
             )
         )
 
-        new_user_id = cursor.lastrowid
+        new_user_id = cursor.fetchone()[0]
 
         # Create referral record, but do NOT pay the ₦25 yet.
         if referrer and referrer["id"] != new_user_id:
@@ -553,7 +554,7 @@ def join_tournament():
     conn = get_db()
 
     try:
-        conn.execute("BEGIN IMMEDIATE")
+        conn.execute("BEGIN")
 
         user = conn.execute(
             "SELECT id, username, balance FROM users WHERE id = ?",
@@ -720,7 +721,7 @@ def matchmaking_start():
 
     # Lock the SQLite transaction before changing the queue.
     # This prevents two players from claiming the same opponent.
-    conn.execute("BEGIN IMMEDIATE")
+    conn.execute("BEGIN")
 
     conn.execute(
         "DELETE FROM game_queue WHERE user_id = ? AND status = 'waiting'",
@@ -796,17 +797,16 @@ def matchmaking_start():
             "match_id": match_id
         }
 
-    conn.execute(
+    queue_cursor = conn.execute(
         """
         INSERT INTO game_queue (user_id, stake, status)
         VALUES (?, ?, 'waiting')
+        RETURNING id
         """,
         (user_id, stake)
     )
 
-    queue_id = conn.execute(
-        "SELECT last_insert_rowid()"
-    ).fetchone()[0]
+    queue_id = queue_cursor.fetchone()[0]
 
     conn.commit()
     conn.close()
@@ -880,7 +880,7 @@ def matchmaking_ai():
     user_id = session["user_id"]
     conn = get_db()
 
-    conn.execute("BEGIN IMMEDIATE")
+    conn.execute("BEGIN")
 
     row = conn.execute(
         """
@@ -1718,9 +1718,17 @@ def history():
 
     def columns(table):
         try:
-            return [x["name"] for x in conn.execute(
-                f"PRAGMA table_info({table})"
-            ).fetchall()]
+            rows = conn.execute(
+                """
+                SELECT column_name AS name
+                FROM information_schema.columns
+                WHERE table_schema = current_schema()
+                  AND table_name = ?
+                ORDER BY ordinal_position
+                """,
+                (table,)
+            ).fetchall()
+            return [x["name"] for x in rows]
         except Exception:
             return []
 
@@ -1930,7 +1938,14 @@ def ensure_tournament_columns():
 
     cols = {
         r["name"]
-        for r in conn.execute("PRAGMA table_info(tournaments)").fetchall()
+        for r in conn.execute(
+            """
+            SELECT column_name AS name
+            FROM information_schema.columns
+            WHERE table_schema = current_schema()
+              AND table_name = 'tournaments'
+            """
+        ).fetchall()
     }
 
     additions = {
@@ -1952,7 +1967,12 @@ def ensure_tournament_columns():
     match_cols = {
         r["name"]
         for r in conn.execute(
-            "PRAGMA table_info(tournament_matches)"
+            """
+            SELECT column_name AS name
+            FROM information_schema.columns
+            WHERE table_schema = current_schema()
+              AND table_name = 'tournament_matches'
+            """
         ).fetchall()
     }
 
